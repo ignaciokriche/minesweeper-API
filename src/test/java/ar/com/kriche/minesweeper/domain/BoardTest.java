@@ -12,7 +12,7 @@ public class BoardTest {
     private static final Log LOGGER = LogFactory.getLog(BoardTest.class);
 
     @Test
-    void whenCreatingBoardThenAdjacentMinesNumbersAreConsistentWithExistingMines() {
+    void adjacentMinesNumbersMustBeConsistentWithExistingMines() {
         Board theTestedBoard = new Board();
         fail("work in progress");
     }
