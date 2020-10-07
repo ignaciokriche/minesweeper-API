@@ -1,3 +1,11 @@
+# decisions taken and important notes:
+
+1. This is the Ignacio's implementation of the minesweeper game.
+
+2. Please, find original content of this file at the bottom.
+
+
+
 # minesweeper-API
 API test
 
