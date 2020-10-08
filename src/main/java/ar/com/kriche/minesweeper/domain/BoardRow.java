@@ -8,13 +8,13 @@ import java.util.List;
  */
 public class BoardRow {
 
-    private final List<Cell> columns;
+    private final List<Cell> cells;
 
     public BoardRow(int size) {
-        columns = new ArrayList<>(size);
+        cells = new ArrayList<>(size);
     }
 
-    public List<Cell> getColumns() {
-        return columns;
+    public List<Cell> getCells() {
+        return cells;
     }
 }
