@@ -10,27 +10,41 @@ import java.util.List;
  */
 public class Board {
 
-    static private final int DEFAULT_ROW_SIZE = 5;
-    static private final int DEFAULT_COLUMN_SIZE = 5;
-    static private final float DEFAULT_MINE_PROBABILITY = 0.1f;
+    private static final int DEFAULT_ROW_SIZE = 10;
+    private static final int DEFAULT_COLUMN_SIZE = 10;
+    private static final int DEFAULT_TOTAL_MINES = 5;
 
-    private List<BoardRow> rows = new ArrayList<>(DEFAULT_ROW_SIZE);
+    private final int rowLength;
+    private final int columnLength;
+    private final int totalMines;
+    private final List<BoardRow> rows;
 
     public Board() {
+        this(DEFAULT_ROW_SIZE, DEFAULT_COLUMN_SIZE, DEFAULT_TOTAL_MINES);
+    }
 
-        // iterate the board once to instantiate the cells:
-        for (int r = 0; r < DEFAULT_ROW_SIZE; r++) {
-            BoardRow row = new BoardRow(DEFAULT_COLUMN_SIZE);
-            for (int c = 0; c < DEFAULT_COLUMN_SIZE; c++) {
-                row.getColumns().add(new Cell(RandomHelper.nextBoolean(DEFAULT_MINE_PROBABILITY)));
+    private Board(int rowLength, int columnLength, int totalMines) {
+
+        this.rowLength = rowLength;
+        this.columnLength = columnLength;
+        this.totalMines = totalMines;
+        this.rows = new ArrayList<>(DEFAULT_ROW_SIZE);
+
+        // iterate the board once to instantiate the cells randomly assigning the mines:
+        List<Boolean> rndBooleans = RandomHelper.shuffledBooleans(totalMines, rowLength * columnLength);
+        for (int r = 0, rndIndex = 0; r < rowLength; r++) {
+            BoardRow row = new BoardRow(columnLength);
+            for (int c = 0; c < columnLength; c++) {
+                row.getColumns().add(new Cell(rndBooleans.get(rndIndex++)));
             }
             rows.add(row);
         }
 
-        // iterate the board again to compute adjacent mines:
-        for (int r = 0; r < DEFAULT_ROW_SIZE; r++) {
-            for (int c = 0; c < DEFAULT_COLUMN_SIZE; c++) {
-                //TODO do we need to compute for mined cell?
+        // iterate the board again to compute adjacent mine numbers:
+        for (int r = 0; r < rowLength; r++) {
+            for (int c = 0; c < columnLength; c++) {
+                // we don't need to compute for mined cell, however for consistency we keep it.
+                // if this becomes a performance issue then mined cells could be skipped.
                 Cell cell = cellAt(r, c);
                 List<Cell> cellNeighbours = getCellNeighbours(r, c);
                 int minedNeighbours = (int) cellNeighbours.stream().filter(n -> n.isMined()).count();
@@ -41,14 +55,15 @@ public class Board {
     }
 
     private List<Cell> getCellNeighbours(int cellRow, int cellColumn) {
+
         // a cell will have at most 8 adjacent cells
         List<Cell> neighbours = new ArrayList<>(8);
 
         // for border cases:
         int lowerRow = Math.max(0, cellRow - 1);
-        int upperRow = Math.min(DEFAULT_ROW_SIZE - 1, cellRow + 1);
+        int upperRow = Math.min(rowLength - 1, cellRow + 1);
         int lowerColumn = Math.max(0, cellColumn - 1);
-        int upperColumn = Math.min(DEFAULT_COLUMN_SIZE - 1, cellColumn + 1);
+        int upperColumn = Math.min(columnLength - 1, cellColumn + 1);
 
         for (int r = lowerRow; r <= upperRow; r++) {
             for (int c = lowerColumn; c <= upperColumn; c++) {
@@ -67,9 +82,7 @@ public class Board {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         rows.forEach(r -> {
-            r.getColumns().forEach(cell -> {
-                stringBuilder.append(cell.toString());
-            });
+            r.getColumns().forEach(cell -> stringBuilder.append(cell));
             stringBuilder.append('\n');
         });
         return stringBuilder.toString();

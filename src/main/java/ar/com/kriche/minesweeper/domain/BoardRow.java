@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class BoardRow {
 
-    private List<Cell> columns;
+    private final List<Cell> columns;
 
     public BoardRow(int size) {
         columns = new ArrayList<>(size);

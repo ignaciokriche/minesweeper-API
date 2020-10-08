@@ -14,6 +14,10 @@ public class BoardTest {
     @Test
     void adjacentMinesNumbersMustBeConsistentWithExistingMines() {
         Board theTestedBoard = new Board();
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\n" + theTestedBoard);
+        }
+
         fail("work in progress");
     }
 

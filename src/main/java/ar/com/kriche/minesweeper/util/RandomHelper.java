@@ -1,6 +1,8 @@
 package ar.com.kriche.minesweeper.util;
 
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Quick and dirty implementation for the sake of simplicity.
@@ -12,9 +14,28 @@ import java.util.Random;
 @Deprecated
 public class RandomHelper {
 
-    private static final Random rnd = new Random();
+    /**
+     * @param numberOfBooleansTrue must be greater than or equal to 0.
+     * @param totalSize            must be must be greater than or equal to numberOfBooleansTrue.
+     * @return a shuffled list of size totalSize having exactly numberOfBooleanTrue elements true and the rest false.
+     */
+    public static List<Boolean> shuffledBooleans(int numberOfBooleansTrue, int totalSize) {
 
-    public static boolean nextBoolean(float probability) {
-        return rnd.nextFloat() < probability;
+        List<Boolean> booleans = new ArrayList<>(totalSize);
+
+        while (totalSize > 0 && numberOfBooleansTrue > 0) {
+            booleans.add(true);
+            totalSize--;
+            numberOfBooleansTrue--;
+        }
+
+        while (totalSize > 0) {
+            booleans.add(false);
+            totalSize--;
+        }
+
+        Collections.shuffle(booleans);
+
+        return booleans;
     }
 }
