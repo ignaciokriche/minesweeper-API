@@ -23,8 +23,8 @@ public class GameSerializer extends JsonSerializer<Game> {
         jsonGenerator.writeObjectField("state", game.getState());
 
         Board theBoard = game.getBoard();
-        jsonGenerator.writeNumberField("rowSize", theBoard.getRowSize());
-        jsonGenerator.writeNumberField("columnSize", theBoard.getColumnSize());
+        jsonGenerator.writeNumberField("rows", theBoard.getRowSize());
+        jsonGenerator.writeNumberField("columns", theBoard.getColumnSize());
         jsonGenerator.writeNumberField("mines", theBoard.getMines());
 
         CellToCellDtoConverter cellToCellDtoConverter;
