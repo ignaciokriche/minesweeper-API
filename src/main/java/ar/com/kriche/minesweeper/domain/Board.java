@@ -1,6 +1,6 @@
 package ar.com.kriche.minesweeper.domain;
 
-import ar.com.kriche.minesweeper.util.RandomHelper;
+import ar.com.kriche.minesweeper.util.RandomService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ public class Board {
 
     private static final int DEFAULT_ROW_SIZE = 10;
     private static final int DEFAULT_COLUMN_SIZE = 10;
-    private static final int DEFAULT_TOTAL_MINES = 5;
+    private static final int DEFAULT_TOTAL_MINES = 7;
 
     private final int rowLength;
     private final int columnLength;
@@ -20,10 +20,14 @@ public class Board {
     private final List<BoardRow> rows;
 
     public Board() {
-        this(DEFAULT_ROW_SIZE, DEFAULT_COLUMN_SIZE, DEFAULT_TOTAL_MINES);
+        this(DEFAULT_ROW_SIZE, DEFAULT_COLUMN_SIZE, DEFAULT_TOTAL_MINES, new RandomService());
     }
 
-    private Board(int rowLength, int columnLength, int totalMines) {
+    public Board(RandomService randomService) {
+        this(DEFAULT_ROW_SIZE, DEFAULT_COLUMN_SIZE, DEFAULT_TOTAL_MINES, randomService);
+    }
+
+    private Board(int rowLength, int columnLength, int totalMines, RandomService randomService) {
 
         this.rowLength = rowLength;
         this.columnLength = columnLength;
@@ -31,7 +35,7 @@ public class Board {
         this.rows = new ArrayList<>(DEFAULT_ROW_SIZE);
 
         // iterate the board once to instantiate the cells randomly assigning the mines:
-        List<Boolean> rndBooleans = RandomHelper.shuffledBooleans(totalMines, rowLength * columnLength);
+        List<Boolean> rndBooleans = randomService.shuffledBooleans(totalMines, rowLength * columnLength);
         for (int r = 0, rndIndex = 0; r < rowLength; r++) {
             BoardRow row = new BoardRow(columnLength);
             for (int c = 0; c < columnLength; c++) {
@@ -67,6 +71,9 @@ public class Board {
 
         for (int r = lowerRow; r <= upperRow; r++) {
             for (int c = lowerColumn; c <= upperColumn; c++) {
+                if (r == cellRow && c == cellColumn) {
+                    continue; // skip self
+                }
                 neighbours.add(cellAt(r, c));
             }
         }
@@ -74,7 +81,7 @@ public class Board {
         return neighbours;
     }
 
-    private Cell cellAt(int row, int column) {
+    public Cell cellAt(int row, int column) {
         return rows.get(row).getColumns().get(column);
     }
 

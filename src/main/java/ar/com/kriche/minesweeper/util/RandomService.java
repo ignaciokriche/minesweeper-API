@@ -1,5 +1,7 @@
 package ar.com.kriche.minesweeper.util;
 
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,14 +14,15 @@ import java.util.List;
  * @Author Kriche 2020
  */
 @Deprecated
-public class RandomHelper {
+@Service
+public class RandomService {
 
     /**
      * @param numberOfBooleansTrue must be greater than or equal to 0.
      * @param totalSize            must be must be greater than or equal to numberOfBooleansTrue.
      * @return a shuffled list of size totalSize having exactly numberOfBooleanTrue elements true and the rest false.
      */
-    public static List<Boolean> shuffledBooleans(int numberOfBooleansTrue, int totalSize) {
+    public List<Boolean> shuffledBooleans(int numberOfBooleansTrue, int totalSize) {
 
         List<Boolean> booleans = new ArrayList<>(totalSize);
 
