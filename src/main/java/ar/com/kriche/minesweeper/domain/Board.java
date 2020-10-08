@@ -74,6 +74,10 @@ public class Board {
         return mines;
     }
 
+    public Cell cellAt(int row, int column) {
+        return rows.get(row).getCells().get(column);
+    }
+
     private List<Cell> getCellNeighbours(int cellRow, int cellColumn) {
 
         // a cell will have at most 8 adjacent cells
@@ -95,10 +99,6 @@ public class Board {
         }
 
         return neighbours;
-    }
-
-    public Cell cellAt(int row, int column) {
-        return rows.get(row).getCells().get(column);
     }
 
     @Override
