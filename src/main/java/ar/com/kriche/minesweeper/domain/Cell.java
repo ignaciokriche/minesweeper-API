@@ -7,11 +7,13 @@ public class Cell {
 
     private final boolean mined;
     private int adjacentMines;
-    private CellState state;
+    private CellMark mark;
+    private boolean revealed;
 
     public Cell(boolean mined) {
         this.mined = mined;
-        this.state = CellState.UNREVEALED;
+        this.revealed = false;
+        this.mark = CellMark.NO_MARK;
     }
 
     public boolean isMined() {
@@ -26,12 +28,20 @@ public class Cell {
         this.adjacentMines = adjacentMines;
     }
 
-    public CellState getState() {
-        return state;
+    public CellMark getMark() {
+        return mark;
     }
 
-    public void setState(CellState state) {
-        this.state = state;
+    public void setMark(CellMark mark) {
+        this.mark = mark;
+    }
+
+    public boolean isRevealed() {
+        return revealed;
+    }
+
+    public void setRevealed(boolean revealed) {
+        this.revealed = revealed;
     }
 
     @Override

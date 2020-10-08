@@ -1,7 +1,9 @@
 package ar.com.kriche.minesweeper.controller;
 
+import ar.com.kriche.minesweeper.domain.Game;
+import ar.com.kriche.minesweeper.domain.GameService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,8 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/game")
 public class GameController {
 
-    @GetMapping("/{id}")
-    public String getGame(@PathVariable("id") Long id) {
-        return "work in progress " + id;
+    @Autowired
+    private GameService gameService;
+
+    @GetMapping
+    public Game getGame() {
+        return gameService.getGame();
     }
+
 }
