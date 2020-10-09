@@ -17,9 +17,9 @@ import static org.junit.Assert.assertEquals;
 
 
 @RunWith(SpringRunner.class)
-public class BoardTest {
+public class GameTest {
 
-    private static final Log LOGGER = LogFactory.getLog(BoardTest.class);
+    private static final Log LOGGER = LogFactory.getLog(GameTest.class);
 
     @MockBean
     private RandomService randomService;
@@ -63,15 +63,15 @@ public class BoardTest {
         Mockito.when(randomService.shuffledBooleans(mines, rowLength * columnLength)).thenReturn(mineLocations);
 
         // exercise:
-        Board actualBoard = new Board(randomService);
+        Game actualGame = new Game(randomService);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("actual board:\n" + actualBoard);
+            LOGGER.debug("actual game:\n" + actualGame);
         }
 
         // verify:
         for (int r = 0; r < rowLength; r++) {
             for (int c = 0; c < columnLength; c++) {
-                Cell actualCell = actualBoard.cellAt(r, c);
+                Cell actualCell = actualGame.cellAt(r, c);
                 assertEquals("at row: " + r + ", col: " + c,
                         expectedMineCounts[r * columnLength + c], actualCell.getAdjacentMines());
             }
@@ -81,7 +81,7 @@ public class BoardTest {
     }
 
     @Test
-    public void givenMineLocationsWhenCreatingBoardThenMinesMustInTheRightCells() {
+    public void givenMineLocationsWhenCreatingGameThenMinesMustInTheRightCells() {
 
         // setup:
 
@@ -105,16 +105,16 @@ public class BoardTest {
         Mockito.when(randomService.shuffledBooleans(mines, rowLength * columnLength)).thenReturn(mineLocations);
 
         // exercise:
-        Board actualBoard = new Board(randomService);
+        Game actualGame = new Game(randomService);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("actual board:\n" + actualBoard);
+            LOGGER.debug("actual game:\n" + actualGame);
         }
 
 
         // verify:
         for (int r = 0; r < rowLength; r++) {
             for (int c = 0; c < columnLength; c++) {
-                Cell actualCell = actualBoard.cellAt(r, c);
+                Cell actualCell = actualGame.cellAt(r, c);
                 assertEquals("at row: " + r + ", col: " + c,
                         mineLocations.get(r * columnLength + c), actualCell.isMined());
             }

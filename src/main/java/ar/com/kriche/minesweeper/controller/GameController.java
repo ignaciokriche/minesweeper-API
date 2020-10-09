@@ -32,7 +32,7 @@ public class GameController {
      * @param move   type of move to make.
      * @return the updated game.
      */
-    @PatchMapping("/cells/{row}/{column}")
+    @PatchMapping("/board/{row}/{column}")
     public Game makeMove(@PathVariable("row") int row,
                          @PathVariable("column") int column,
                          @RequestBody MoveDTO move) {

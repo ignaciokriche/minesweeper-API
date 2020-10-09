@@ -1,6 +1,5 @@
 package ar.com.kriche.minesweeper.controller;
 
-import ar.com.kriche.minesweeper.domain.Board;
 import ar.com.kriche.minesweeper.domain.Cell;
 import ar.com.kriche.minesweeper.domain.Game;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -21,11 +20,9 @@ public class GameSerializer extends JsonSerializer<Game> {
         jsonGenerator.writeStartObject();
 
         jsonGenerator.writeObjectField("state", game.getState());
-
-        Board theBoard = game.getBoard();
-        jsonGenerator.writeNumberField("rows", theBoard.getRowSize());
-        jsonGenerator.writeNumberField("columns", theBoard.getColumnSize());
-        jsonGenerator.writeNumberField("mines", theBoard.getMines());
+        jsonGenerator.writeNumberField("rows", game.getRowSize());
+        jsonGenerator.writeNumberField("columns", game.getColumnSize());
+        jsonGenerator.writeNumberField("mines", game.getMines());
 
         CellToCellDtoConverter cellToCellDtoConverter;
         if (game.getState() == IN_PROGRESS) {
@@ -35,8 +32,7 @@ public class GameSerializer extends JsonSerializer<Game> {
             // game finished: good to show all the information.
             cellToCellDtoConverter = cell -> new CellDTO(cell.isMined(), cell.getAdjacentMines(), cell.getMark(), cell.isRevealed());
         }
-
-        jsonGenerator.writeObjectField("rows", theBoard.getRows().stream().map(r -> r.getCells().stream().map(c -> cellToCellDtoConverter.convert(c))));
+        jsonGenerator.writeObjectField("board", game.getBoard().stream().map(r -> r.getCells().stream().map(c -> cellToCellDtoConverter.convert(c))));
 
         jsonGenerator.writeEndObject();
     }
