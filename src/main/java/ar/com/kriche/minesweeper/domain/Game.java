@@ -1,9 +1,13 @@
 package ar.com.kriche.minesweeper.domain;
 
 import ar.com.kriche.minesweeper.util.RandomService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
+
 
 /**
  * Represents a minesweeper game.
@@ -16,6 +20,7 @@ public class Game {
     private static final int DEFAULT_ROW_SIZE = 10;
     private static final int DEFAULT_COLUMN_SIZE = 10;
     private static final int DEFAULT_TOTAL_MINES = 7;
+    private static final Log LOGGER = LogFactory.getLog(Game.class);
 
     private final int rowSize;
     private final int columnSize;
@@ -55,12 +60,13 @@ public class Game {
         // iterate the board again to compute adjacent mine numbers:
         for (int r = 0; r < rowSize; r++) {
             for (int c = 0; c < columnSize; c++) {
-                // we don't need to compute for mined cell, however for consistency we keep it.
+                // we don't need to compute for mined cell, however for data completeness we keep it.
                 // if this becomes a performance issue then mined cells could be skipped.
-                Cell cell = cellAt(r, c);
-                List<Cell> cellNeighbours = getCellNeighbours(r, c);
-                int minedNeighbours = (int) cellNeighbours.stream().filter(n -> n.isMined()).count();
-                cell.setAdjacentMines(minedNeighbours);
+                int minedNeighbours = (int) getNeighbours(r, c).
+                        map(coords -> cellAt(coords.getRow(), coords.getColumn())).
+                        filter(n -> n.isMined()).
+                        count();
+                cellAt(r, c).setAdjacentMines(minedNeighbours);
             }
         }
 
@@ -94,10 +100,9 @@ public class Game {
         return state;
     }
 
-    private List<Cell> getCellNeighbours(int cellRow, int cellColumn) {
+    private Stream<CellCoordinate> getNeighbours(int cellRow, int cellColumn) {
 
-        // a cell will have at most 8 adjacent cells
-        List<Cell> neighbours = new ArrayList<>(8);
+        Stream.Builder<CellCoordinate> neighbours = Stream.builder();
 
         // for border cases:
         int lowerRow = Math.max(0, cellRow - 1);
@@ -110,11 +115,28 @@ public class Game {
                 if (r == cellRow && c == cellColumn) {
                     continue; // skip self
                 }
-                neighbours.add(cellAt(r, c));
+                neighbours.accept(new CellCoordinate(r, c));
             }
         }
 
-        return neighbours;
+        return neighbours.build();
+    }
+
+    /**
+     * if the cell at <code>row</code>, <code>column</code> is not revealed then reveal it.
+     * Repeats for cell's neighbours if cell has no adjacent mines.
+     *
+     * @param row
+     * @param column
+     */
+    public void revealAndPropagate(int row, int column) {
+        Cell cell = cellAt(row, column);
+        if (!cell.isRevealed()) {
+            cell.setRevealed(true);
+            if (cell.getAdjacentMines() == 0) {
+                getNeighbours(row, column).forEach(n -> revealAndPropagate(n.getRow(), n.getColumn()));
+            }
+        }
     }
 
     @Override

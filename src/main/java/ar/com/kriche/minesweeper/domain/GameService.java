@@ -1,6 +1,12 @@
 package ar.com.kriche.minesweeper.domain;
 
+import ar.com.kriche.minesweeper.util.RandomService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import static ar.com.kriche.minesweeper.domain.GameState.USER_LOST;
 
 /**
  * makes the moves to the game and updates the game state accordingly.
@@ -10,9 +16,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class GameService {
 
-    private static Game theCurrentGame = new Game();
+    private static final Log LOGGER = LogFactory.getLog(GameService.class);
+    private static Game theCurrentGame;
+    @Autowired
+    private RandomService randomService;
 
     public Game getGame() {
+        if (theCurrentGame == null) {
+            theCurrentGame = new Game(randomService);
+        }
         return theCurrentGame;
     }
 
@@ -24,7 +36,19 @@ public class GameService {
      */
     public Game revealCell(Game game, int row, int column) {
         // TODO
-        return getGame();
+        Cell cell = game.cellAt(row, column);
+        if (cell.isRevealed()) {
+            // TODO illegal argument;
+            return game;
+        }
+        if (cell.isMined()) {
+            cell.setRevealed(true);
+            game.setState(USER_LOST);
+        } else {
+            game.revealAndPropagate(row, column);
+        }
+
+        return game;
     }
 
     /**
