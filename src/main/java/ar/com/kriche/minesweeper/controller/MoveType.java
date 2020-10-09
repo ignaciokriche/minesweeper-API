@@ -8,5 +8,6 @@ package ar.com.kriche.minesweeper.controller;
 public enum MoveType {
     REVEAL,
     MARK_RED_FLAG,
-    MARK_QUESTION
+    MARK_QUESTION,
+    REMOVE_MARK
 }

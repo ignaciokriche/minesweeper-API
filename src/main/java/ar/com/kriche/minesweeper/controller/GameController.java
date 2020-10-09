@@ -5,6 +5,8 @@ import ar.com.kriche.minesweeper.domain.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import static ar.com.kriche.minesweeper.domain.CellMark.*;
+
 /**
  * API entry point for playing the game.
  *
@@ -16,7 +18,6 @@ public class GameController {
 
     @Autowired
     private GameService gameService;
-
 
     /**
      * @return the existing game.
@@ -36,20 +37,19 @@ public class GameController {
     public Game makeMove(@PathVariable("row") int row,
                          @PathVariable("column") int column,
                          @RequestBody MoveDTO move) {
-
         // TODO validations and errors.
-
         switch (move.getType()) {
             case REVEAL:
                 return gameService.revealCell(getGame(), row, column);
             case MARK_QUESTION:
-                return gameService.markQuestionCell(getGame(), row, column);
+                return gameService.markCell(getGame(), row, column, QUESTION_MARK);
             case MARK_RED_FLAG:
-                return gameService.markRedFlagCell(getGame(), row, column);
+                return gameService.markCell(getGame(), row, column, RED_FLAG_MARK);
+            case REMOVE_MARK:
+                return gameService.markCell(getGame(), row, column, NO_MARK);
             default:
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("unknown type: " + move.getType());
         }
-
     }
 
 }

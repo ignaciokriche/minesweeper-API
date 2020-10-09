@@ -100,6 +100,10 @@ public class Game {
         return state;
     }
 
+    public boolean isInProgress() {
+        return getState() == GameState.IN_PROGRESS;
+    }
+
     private Stream<CellCoordinate> getNeighbours(int cellRow, int cellColumn) {
 
         Stream.Builder<CellCoordinate> neighbours = Stream.builder();
