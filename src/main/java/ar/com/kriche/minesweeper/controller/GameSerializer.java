@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import org.springframework.boot.jackson.JsonComponent;
 
 import java.io.IOException;
+import java.util.function.Function;
 
 import static ar.com.kriche.minesweeper.domain.GameState.IN_PROGRESS;
 
@@ -24,20 +25,20 @@ public class GameSerializer extends JsonSerializer<Game> {
         jsonGenerator.writeNumberField("columns", game.getColumnSize());
         jsonGenerator.writeNumberField("mines", game.getMines());
 
-        CellToCellDtoConverter cellToCellDtoConverter;
+        Function<Cell, CellDTO> cellToCellDTO;
         if (game.getState() == IN_PROGRESS) {
             // while in progress don't tell if a cell is mined and show adjacent mines only if the cell is revealed:
-            cellToCellDtoConverter = cell -> new CellDTO(null, cell.isRevealed() ? cell.getAdjacentMines() : null, cell.getMark(), cell.isRevealed());
+            cellToCellDTO = cell ->
+                    new CellDTO(null, cell.isRevealed() ? cell.getAdjacentMines() : null, cell.getMark(), cell.isRevealed());
         } else {
             // game finished: good to show all the information.
-            cellToCellDtoConverter = cell -> new CellDTO(cell.isMined(), cell.getAdjacentMines(), cell.getMark(), cell.isRevealed());
+            cellToCellDTO =
+                    cell -> new CellDTO(cell.isMined(), cell.getAdjacentMines(), cell.getMark(), cell.isRevealed());
         }
-        jsonGenerator.writeObjectField("board", game.getBoard().stream().map(r -> r.getCells().stream().map(c -> cellToCellDtoConverter.convert(c))));
+        jsonGenerator.writeObjectField("board",
+                game.getBoard().stream().map(r -> r.getCells().stream().map(cell -> cellToCellDTO.apply(cell))));
 
         jsonGenerator.writeEndObject();
     }
 
-    interface CellToCellDtoConverter {
-        CellDTO convert(Cell cell);
-    }
 }
