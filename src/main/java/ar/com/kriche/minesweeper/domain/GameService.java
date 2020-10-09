@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import static ar.com.kriche.minesweeper.domain.GameState.USER_LOST;
 
+
 /**
  * makes the moves to the game and updates the game state accordingly.
  *
@@ -17,13 +18,23 @@ import static ar.com.kriche.minesweeper.domain.GameState.USER_LOST;
 public class GameService {
 
     private static final Log LOGGER = LogFactory.getLog(GameService.class);
-    private static Game theCurrentGame;
-    @Autowired
+
     private RandomService randomService;
+    private Game theCurrentGame;
+
+
+    @Autowired
+    public GameService(RandomService randomService) {
+        this.randomService = randomService;
+    }
+
+    public void initializeGame() {
+        theCurrentGame = new Game(randomService);
+    }
 
     public Game getGame() {
         if (theCurrentGame == null) {
-            theCurrentGame = new Game(randomService);
+            initializeGame();
         }
         return theCurrentGame;
     }
