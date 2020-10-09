@@ -46,7 +46,13 @@ public class Cell {
 
     @Override
     public String toString() {
-        return isMined() ? "* " : getAdjacentMines() + " ";
+        if (isRevealed()) {
+            if (isMined()) {
+                return "M ";
+            }
+            return getAdjacentMines() + " ";
+        }
+        return "* ";
     }
 
 }

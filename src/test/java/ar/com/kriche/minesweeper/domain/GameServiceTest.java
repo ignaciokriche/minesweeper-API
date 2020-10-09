@@ -30,8 +30,44 @@ public class GameServiceTest {
     @Autowired
     private GameService theTested;
 
+
     @Test
-    public void givenEmptyMinedCellWhenRevealingThenItMustNotPropagate() {
+    public void givenNoMinesWhenRevealingThenItMustPropagateToAllCells() {
+
+        List mineLocations = Arrays.asList(
+                false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false
+        );
+
+        Boolean[][] expectedRevealed = {
+                {true, true, true, true, true, true, true, true, true, true},
+                {true, true, true, true, true, true, true, true, true, true},
+                {true, true, true, true, true, true, true, true, true, true},
+                {true, true, true, true, true, true, true, true, true, true},
+                {true, true, true, true, true, true, true, true, true, true},
+                {true, true, true, true, true, true, true, true, true, true},
+                {true, true, true, true, true, true, true, true, true, true},
+                {true, true, true, true, true, true, true, true, true, true},
+                {true, true, true, true, true, true, true, true, true, true},
+                {true, true, true, true, true, true, true, true, true, true},
+        };
+
+        testMove(mineLocations,
+                (game) -> theTested.revealCell(game, 2, 2),
+                cell -> cell.isRevealed(),
+                expectedRevealed);
+    }
+
+    @Test
+    public void givenMinedCellWhenRevealingThenItMustNotPropagate() {
 
         List mineLocations = Arrays.asList(
                 false, false, false, false, false, false, false, false, false, false,
@@ -66,32 +102,33 @@ public class GameServiceTest {
     }
 
     @Test
-    public void givenAllEmptyNotMinedCellsWhenRevealingThenItMustPropagateToAllCells() {
+    public void givenMinedBorderWhenRevealingCellWithAdjacentMineThenItMustNotPropagate() {
 
         List mineLocations = Arrays.asList(
-                false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false,
-                false, false, false, false, false, false, false, false, false, false
+                true, true, true, true, true, true, true, true, true, true,
+                true, true, true, true, true, true, true, true, true, true,
+                true, true, false, false, false, false, false, false, true, true,
+                true, true, false, false, false, false, false, false, true, true,
+                true, true, false, false, false, false, false, false, true, true,
+                true, true, false, false, false, false, false, false, true, true,
+                true, true, false, false, false, false, false, false, true, true,
+                true, true, false, false, false, false, false, false, true, true,
+                true, true, true, true, true, true, true, true, true, true,
+                true, true, true, true, true, true, true, true, true, true
         );
 
         Boolean[][] expectedRevealed = {
-                {true, true, true, true, true, true, true, true, true, true},
-                {true, true, true, true, true, true, true, true, true, true},
-                {true, true, true, true, true, true, true, true, true, true},
-                {true, true, true, true, true, true, true, true, true, true},
-                {true, true, true, true, true, true, true, true, true, true},
-                {true, true, true, true, true, true, true, true, true, true},
-                {true, true, true, true, true, true, true, true, true, true},
-                {true, true, true, true, true, true, true, true, true, true},
-                {true, true, true, true, true, true, true, true, true, true},
-                {true, true, true, true, true, true, true, true, true, true},
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, true, false, false, false, false, false, false, false},
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, false, false, false, false, false, false, false, false},
+
         };
 
         testMove(mineLocations,
@@ -99,6 +136,77 @@ public class GameServiceTest {
                 cell -> cell.isRevealed(),
                 expectedRevealed);
     }
+
+    @Test
+    public void givenRectangleWithNoMineNoAdjacentCellsWhenRevealingThenItMustPropagateWithinThatRectangle() {
+
+        List mineLocations = Arrays.asList(
+                true, true, true, true, true, true, true, true, true, true,
+                true, true, true, true, true, true, true, true, true, true,
+                true, true, false, false, false, false, false, false, true, true,
+                true, true, false, false, false, false, false, false, true, true,
+                true, true, false, false, false, false, false, false, true, true,
+                true, true, false, false, false, false, false, false, true, true,
+                true, true, false, false, false, false, false, false, true, true,
+                true, true, false, false, false, false, false, false, true, true,
+                true, true, true, true, true, true, true, true, true, true,
+                true, true, true, true, true, true, true, true, true, true
+        );
+
+        Boolean[][] expectedRevealed = {
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, true, true, true, true, true, true, false, false},
+                {false, false, true, true, true, true, true, true, false, false},
+                {false, false, true, true, true, true, true, true, false, false},
+                {false, false, true, true, true, true, true, true, false, false},
+                {false, false, true, true, true, true, true, true, false, false},
+                {false, false, true, true, true, true, true, true, false, false},
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, false, false, false, false, false, false, false, false}
+        };
+
+        testMove(mineLocations,
+                (game) -> theTested.revealCell(game, 3, 3),
+                cell -> cell.isRevealed(),
+                expectedRevealed);
+    }
+
+    @Test
+    public void givenBorderWithNoMineNoAdjacentCellsWhenRevealingCornerCellThenItMustPropagateWithinThatBorder() {
+
+        List mineLocations = Arrays.asList(
+                false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false,
+                false, false, true, true, true, true, true, true, false, false,
+                false, false, true, true, true, true, true, true, false, false,
+                false, false, true, true, true, true, true, true, false, false,
+                false, false, true, true, true, true, true, true, false, false,
+                false, false, true, true, true, true, true, true, false, false,
+                false, false, true, true, true, true, true, true, false, false,
+                false, false, false, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false
+        );
+
+        Boolean[][] expectedRevealed = {
+                {true, true, true, true, true, true, true, true, true, true},
+                {true, true, true, true, true, true, true, true, true, true},
+                {true, true, false, false, false, false, false, false, true, true},
+                {true, true, false, false, false, false, false, false, true, true},
+                {true, true, false, false, false, false, false, false, true, true},
+                {true, true, false, false, false, false, false, false, true, true},
+                {true, true, false, false, false, false, false, false, true, true},
+                {true, true, false, false, false, false, false, false, true, true},
+                {true, true, true, true, true, true, true, true, true, true},
+                {true, true, true, true, true, true, true, true, true, true}
+        };
+
+        testMove(mineLocations,
+                (game) -> theTested.revealCell(game, 0, 0),
+                cell -> cell.isRevealed(),
+                expectedRevealed);
+    }
+
 
     /**
      * setups a game with <code>mineLocations</code>, makes the move calling <code>moveMaker</code> and checks the
@@ -119,7 +227,7 @@ public class GameServiceTest {
         theTested.initializeGame();
         Game game = theTested.getGame();
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("game before move:\n" + game);
+            LOGGER.debug("\ngame before move:\n" + game);
         }
 
         //exercise:
@@ -127,7 +235,7 @@ public class GameServiceTest {
 
         // verify:
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("game atfer move:\n" + game);
+            LOGGER.debug("\ngame after move:\n" + game);
         }
         verifyCells(expectedResults, game, cellMapper);
         Mockito.verify(randomService).shuffledBooleans(game.getMines(), mineLocations.size());
