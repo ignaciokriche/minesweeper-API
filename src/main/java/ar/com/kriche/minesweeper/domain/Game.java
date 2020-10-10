@@ -16,6 +16,7 @@ public class Game {
     private final int columnSize;
     private final int mines;
     private int availableFlags;
+    private int revealedCells;
     private final List<BoardRow> board;
     private GameState state;
 
@@ -24,6 +25,7 @@ public class Game {
         this.columnSize = columns;
         this.mines = mines;
         this.availableFlags = mines;
+        this.revealedCells = 0;
         this.board = new ArrayList<>(rows);
         this.state = GameState.IN_PROGRESS;
     }
@@ -44,8 +46,28 @@ public class Game {
         return availableFlags;
     }
 
-    public void setAvailableFlags(int availableFlags) {
+    private void setAvailableFlags(int availableFlags) {
         this.availableFlags = availableFlags;
+    }
+
+    public void decreaseAvailableFlags() {
+        setAvailableFlags(getAvailableFlags() - 1);
+    }
+
+    public void increaseAvailableFlags() {
+        setAvailableFlags(getAvailableFlags() + 1);
+    }
+
+    public int getRevealedCells() {
+        return revealedCells;
+    }
+
+    private void setRevealedCells(int revealedCells) {
+        this.revealedCells = revealedCells;
+    }
+
+    public void increaseRevealedCells() {
+        setRevealedCells(getRevealedCells() + 1);
     }
 
     public List<BoardRow> getBoard() {
@@ -101,11 +123,4 @@ public class Game {
         return stringBuilder.toString();
     }
 
-    public void decreaseAvailableFlags() {
-        setAvailableFlags(getAvailableFlags() - 1);
-    }
-
-    public void increaseAvailableFlags() {
-        setAvailableFlags(getAvailableFlags() + 1);
-    }
 }

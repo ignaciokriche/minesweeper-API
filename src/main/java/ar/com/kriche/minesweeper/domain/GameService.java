@@ -11,6 +11,7 @@ import java.util.List;
 import static ar.com.kriche.minesweeper.domain.CellMark.NO_MARK;
 import static ar.com.kriche.minesweeper.domain.CellMark.RED_FLAG_MARK;
 import static ar.com.kriche.minesweeper.domain.GameState.USER_LOST;
+import static ar.com.kriche.minesweeper.domain.GameState.USER_WON;
 
 
 /**
@@ -66,13 +67,19 @@ public class GameService {
             throw new IllegalStateException("cannot reveal a cell marked with a flag. Remove flag first.");
         }
         if (cell.isMined()) {
-            cell.setRevealed(true);
+            revealCellAndIncreaseRevealed(cell, game);
             game.setState(USER_LOST);
+            LOGGER.info("game over!");
         } else {
             revealAndPropagate(row, column, game);
+            if (game.getRevealedCells() == game.getRowSize() * game.getColumnSize() - game.getMines()) {
+                game.setState(USER_WON);
+                LOGGER.info("user won!");
+            }
         }
         return game;
     }
+
 
     /**
      * @param game
@@ -147,7 +154,7 @@ public class GameService {
     private void revealAndPropagate(int row, int column, Game game) {
         Cell cell = game.cellAt(row, column);
         if (!cell.isRevealed()) {
-            cell.setRevealed(true);
+            revealCellAndIncreaseRevealed(cell, game);
             markCellAndUpdateAvailableFlags(cell, NO_MARK, game);
             if (cell.getAdjacentMines() == 0) {
                 game.getNeighbours(row, column).forEach(n -> revealAndPropagate(n.getRow(), n.getColumn(), game));
@@ -162,6 +169,11 @@ public class GameService {
             game.increaseAvailableFlags();
         }
         cell.setMark(mark);
+    }
+
+    private void revealCellAndIncreaseRevealed(Cell cell, Game game) {
+        cell.setRevealed(true);
+        game.increaseRevealedCells();
     }
 
 }
