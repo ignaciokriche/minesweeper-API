@@ -1,5 +1,8 @@
 package ar.com.kriche.minesweeper.domain;
 
+import static ar.com.kriche.minesweeper.domain.CellMark.REVEALED;
+import static ar.com.kriche.minesweeper.domain.CellMark.UNREVEALED_NO_MARK;
+
 /**
  * @Author Kriche 2020
  */
@@ -8,12 +11,10 @@ public class Cell {
     private final boolean mined;
     private int adjacentMines;
     private CellMark mark;
-    private boolean revealed;
 
     public Cell(boolean mined) {
         this.mined = mined;
-        this.revealed = false;
-        this.mark = CellMark.NO_MARK;
+        this.mark = UNREVEALED_NO_MARK;
     }
 
     public boolean isMined() {
@@ -37,22 +38,25 @@ public class Cell {
     }
 
     public boolean isRevealed() {
-        return revealed;
-    }
-
-    public void setRevealed(boolean revealed) {
-        this.revealed = revealed;
+        return this.getMark() == REVEALED;
     }
 
     @Override
     public String toString() {
-        if (isRevealed()) {
-            if (isMined()) {
-                return "M ";
-            }
-            return getAdjacentMines() + " ";
+        switch (getMark()) {
+            case UNREVEALED_NO_MARK:
+                return "* ";
+            case UNREVEALED_RED_FLAG_MARK:
+                return "F ";
+            case UNREVEALED_QUESTION_MARK:
+                return "? ";
+            case REVEALED:
+                if (isMined()) {
+                    return "M ";
+                }
+                return getAdjacentMines() + " ";
         }
-        return "* ";
+        throw new Error("unknown mark:" + getMark());
     }
 
 }

@@ -9,13 +9,11 @@ public class CellDTO {
     private Boolean mined;
     private Integer adjacentMines;
     private CellMark mark;
-    private boolean revealed;
 
-    public CellDTO(Boolean mined, Integer adjacentMines, CellMark mark, boolean revealed) {
+    public CellDTO(Boolean mined, Integer adjacentMines, CellMark mark) {
         this.mined = mined;
         this.adjacentMines = adjacentMines;
         this.mark = mark;
-        this.revealed = revealed;
     }
 
     public Boolean getMined() {
@@ -28,10 +26,6 @@ public class CellDTO {
 
     public CellMark getMark() {
         return mark;
-    }
-
-    public boolean isRevealed() {
-        return revealed;
     }
 
 }

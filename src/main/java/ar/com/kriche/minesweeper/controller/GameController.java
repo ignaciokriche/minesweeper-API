@@ -42,11 +42,11 @@ public class GameController {
             case REVEAL:
                 return gameService.revealCell(getGame(), row, column);
             case MARK_QUESTION:
-                return gameService.markCell(getGame(), row, column, QUESTION_MARK);
+                return gameService.markCell(getGame(), row, column, UNREVEALED_QUESTION_MARK);
             case MARK_RED_FLAG:
-                return gameService.markCell(getGame(), row, column, RED_FLAG_MARK);
+                return gameService.markCell(getGame(), row, column, UNREVEALED_RED_FLAG_MARK);
             case REMOVE_MARK:
-                return gameService.markCell(getGame(), row, column, NO_MARK);
+                return gameService.markCell(getGame(), row, column, UNREVEALED_NO_MARK);
             default:
                 throw new IllegalArgumentException("unknown type: " + move.getType());
         }

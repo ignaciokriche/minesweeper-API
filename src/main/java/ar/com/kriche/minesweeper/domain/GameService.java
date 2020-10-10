@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static ar.com.kriche.minesweeper.domain.CellMark.NO_MARK;
-import static ar.com.kriche.minesweeper.domain.CellMark.RED_FLAG_MARK;
+import static ar.com.kriche.minesweeper.domain.CellMark.REVEALED;
+import static ar.com.kriche.minesweeper.domain.CellMark.UNREVEALED_RED_FLAG_MARK;
 import static ar.com.kriche.minesweeper.domain.GameState.USER_LOST;
 import static ar.com.kriche.minesweeper.domain.GameState.USER_WON;
 
@@ -63,11 +63,11 @@ public class GameService {
         validateGameInProgress(game, "cannot reveal a cell of a game not in progress.");
         Cell cell = game.cellAt(row, column);
         validateCellNotRevealed(cell, "cannot reveal a cell already revealed.");
-        if (cell.getMark() == RED_FLAG_MARK) {
+        if (cell.getMark() == UNREVEALED_RED_FLAG_MARK) {
             throw new IllegalStateException("cannot reveal a cell marked with a flag. Remove flag first.");
         }
         if (cell.isMined()) {
-            revealCellAndIncreaseRevealed(cell, game);
+            markCellAndUpdateGameCounters(REVEALED, cell, game);
             game.setState(USER_LOST);
             LOGGER.info("game over!");
         } else {
@@ -95,10 +95,7 @@ public class GameService {
         if (cell.getMark() == mark) {
             throw new IllegalStateException("cell already marked as: " + mark);
         }
-        if (game.getAvailableFlags() == 0 && mark == RED_FLAG_MARK) {
-            throw new IllegalStateException("No available flags." + mark);
-        }
-        markCellAndUpdateAvailableFlags(cell, mark, game);
+        markCellAndUpdateGameCounters(mark, cell, game);
         return game;
     }
 
@@ -154,26 +151,55 @@ public class GameService {
     private void revealAndPropagate(int row, int column, Game game) {
         Cell cell = game.cellAt(row, column);
         if (!cell.isRevealed()) {
-            revealCellAndIncreaseRevealed(cell, game);
-            markCellAndUpdateAvailableFlags(cell, NO_MARK, game);
+            markCellAndUpdateGameCounters(REVEALED, cell, game);
             if (cell.getAdjacentMines() == 0) {
                 game.getNeighbours(row, column).forEach(n -> revealAndPropagate(n.getRow(), n.getColumn(), game));
             }
         }
     }
 
-    private void markCellAndUpdateAvailableFlags(Cell cell, CellMark mark, Game game) {
-        if (mark == RED_FLAG_MARK) {
-            game.decreaseAvailableFlags();
-        } else if (cell.getMark() == RED_FLAG_MARK) {
-            game.increaseAvailableFlags();
-        }
-        cell.setMark(mark);
-    }
 
-    private void revealCellAndIncreaseRevealed(Cell cell, Game game) {
-        cell.setRevealed(true);
-        game.increaseRevealedCells();
+    /**
+     * updates cell mark and available flags and revealed cell counters accordingly.
+     * use only this method to mutate a cell mark!
+     *
+     * @param mark
+     * @param cell
+     * @param game
+     */
+    private void markCellAndUpdateGameCounters(CellMark mark, Cell cell, Game game) {
+
+        if (mark == cell.getMark()) {
+            return;
+        }
+
+        switch (mark) {
+
+            case UNREVEALED_RED_FLAG_MARK:
+                if (game.getAvailableFlags() == 0) {
+                    throw new IllegalStateException("No available flags." + mark);
+                }
+                // setting a flag decreases available flags.
+                game.decreaseAvailableFlags();
+                break;
+
+            case REVEALED:
+                // revealing increases revealed cells.
+                game.increaseRevealedCells();
+            case UNREVEALED_NO_MARK:
+            case UNREVEALED_QUESTION_MARK:
+                // for these 3 cases above if there was a flag then available flags must increase.
+                if (cell.getMark() == UNREVEALED_RED_FLAG_MARK) {
+                    game.increaseAvailableFlags();
+                }
+                break;
+
+            default:
+                throw new Error("unknown mark:" + mark);
+        }
+
+        cell.setMark(mark);
+
     }
 
 }
