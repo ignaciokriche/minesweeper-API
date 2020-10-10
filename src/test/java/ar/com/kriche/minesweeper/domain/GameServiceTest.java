@@ -5,18 +5,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
 
 
 @SpringBootTest
@@ -29,6 +30,87 @@ public class GameServiceTest {
 
     @Autowired
     private GameService theTested;
+
+
+    @Test
+    public void adjacentMinesNumbersMustBeConsistentWithExistingMines() {
+
+        // setup:
+
+        List mineLocations = Arrays.asList(
+                false, false, false, false, true, false, false, false, false, true,
+                false, false, false, false, false, false, false, false, false, false,
+                true, false, false, false, true, false, false, false, false, false,
+                false, false, false, true, false, false, false, false, false, false,
+                false, false, true, true, false, false, false, false, false, true,
+                false, false, false, false, false, false, false, false, false, false,
+                false, false, false, true, false, false, false, false, false, true,
+                false, false, false, true, false, false, false, false, true, false,
+                false, false, true, false, false, false, false, false, false, false,
+                false, false, false, false, false, false, false, false, false, false
+        );
+
+        // note: we also check mine count for mined cells.
+        Integer[][] expectedMineCounts = {
+                {0, 0, 0, 1, 0, 1, 0, 0, 1, 0},
+                {1, 1, 0, 2, 2, 2, 0, 0, 1, 1},
+                {0, 1, 1, 2, 1, 1, 0, 0, 0, 0},
+                {1, 2, 3, 3, 3, 1, 0, 0, 1, 1},
+                {0, 1, 2, 2, 2, 0, 0, 0, 1, 0},
+                {0, 1, 3, 3, 2, 0, 0, 0, 2, 2},
+                {0, 0, 2, 1, 2, 0, 0, 1, 2, 1},
+                {0, 1, 3, 2, 2, 0, 0, 1, 1, 2},
+                {0, 1, 1, 2, 1, 0, 0, 1, 1, 1},
+                {0, 1, 1, 1, 0, 0, 0, 0, 0, 0}
+        };
+
+        Mockito.when(randomService.shuffledBooleans(anyInt(), anyInt())).thenReturn(mineLocations);
+
+        // exercise:
+        theTested.initializeGame();
+        Game game = theTested.getGame();
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame:\n" + game);
+        }
+
+        // verify:
+        verifyCells(expectedMineCounts, game, c -> c.getAdjacentMines());
+        Mockito.verify(randomService).shuffledBooleans(game.getMines(), mineLocations.size());
+
+    }
+
+    @Test
+    public void givenMineLocationsWhenCreatingGameThenMinesMustInTheRightCells() {
+
+        // setup:
+
+        Boolean[][] minesLocation = {
+                {true, false, false, false, false, false, false, false, false, false},
+                {true, false, false, false, false, false, false, false, true, false},
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, false, false, true, false, false, false, false, false},
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, false, true, false, true, false, false, false, false},
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, false, false, false, false, false, true, false, false},
+                {false, false, false, false, true, false, false, false, false, false},
+                {false, false, false, false, false, false, false, false, false, true},
+        };
+
+        List minesLocationFlatted = Arrays.stream(minesLocation).flatMap(row -> Arrays.stream(row)).collect(Collectors.toList());
+        Mockito.when(randomService.shuffledBooleans(anyInt(), anyInt())).thenReturn(minesLocationFlatted);
+
+        // exercise:
+        theTested.initializeGame();
+        Game game = theTested.getGame();
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("actual game:\n" + game);
+        }
+
+        verifyCells(minesLocation, game, c -> c.isMined());
+        Mockito.verify(randomService).shuffledBooleans(game.getMines(), minesLocationFlatted.size());
+
+    }
 
 
     @Test
