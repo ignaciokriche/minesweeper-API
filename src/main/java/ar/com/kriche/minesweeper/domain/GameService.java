@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static ar.com.kriche.minesweeper.domain.CellMark.NO_MARK;
 import static ar.com.kriche.minesweeper.domain.CellMark.RED_FLAG_MARK;
 import static ar.com.kriche.minesweeper.domain.GameState.USER_LOST;
 
@@ -80,7 +81,6 @@ public class GameService {
      * @return
      */
     public Game markCell(Game game, int row, int column, CellMark mark) {
-        //TODO
         LOGGER.debug("mark cell [" + row + "," + column + "] with: " + mark);
         validateGameInProgress(game, "cannot mark cell of a game not in progress.");
         Cell cell = game.cellAt(row, column);
@@ -88,7 +88,10 @@ public class GameService {
         if (cell.getMark() == mark) {
             throw new IllegalStateException("cell already marked as: " + mark);
         }
-        cell.setMark(mark);
+        if (game.getAvailableFlags() == 0 && mark == RED_FLAG_MARK) {
+            throw new IllegalStateException("No available flags." + mark);
+        }
+        markCellAndUpdateAvailableFlags(cell, mark, game);
         return game;
     }
 
@@ -145,11 +148,20 @@ public class GameService {
         Cell cell = game.cellAt(row, column);
         if (!cell.isRevealed()) {
             cell.setRevealed(true);
-            cell.setMark(CellMark.NO_MARK);
+            markCellAndUpdateAvailableFlags(cell, NO_MARK, game);
             if (cell.getAdjacentMines() == 0) {
                 game.getNeighbours(row, column).forEach(n -> revealAndPropagate(n.getRow(), n.getColumn(), game));
             }
         }
+    }
+
+    private void markCellAndUpdateAvailableFlags(Cell cell, CellMark mark, Game game) {
+        if (mark == RED_FLAG_MARK) {
+            game.decreaseAvailableFlags();
+        } else if (cell.getMark() == RED_FLAG_MARK) {
+            game.increaseAvailableFlags();
+        }
+        cell.setMark(mark);
     }
 
 }

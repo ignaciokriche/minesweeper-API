@@ -15,7 +15,6 @@ public class Game {
     private final int rowSize;
     private final int columnSize;
     private final int mines;
-
     private int availableFlags;
     private final List<BoardRow> board;
     private GameState state;
@@ -102,4 +101,11 @@ public class Game {
         return stringBuilder.toString();
     }
 
+    public void decreaseAvailableFlags() {
+        setAvailableFlags(getAvailableFlags() - 1);
+    }
+
+    public void increaseAvailableFlags() {
+        setAvailableFlags(getAvailableFlags() + 1);
+    }
 }
