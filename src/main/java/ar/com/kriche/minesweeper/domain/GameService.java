@@ -1,5 +1,6 @@
 package ar.com.kriche.minesweeper.domain;
 
+import ar.com.kriche.minesweeper.repository.GameRepository;
 import ar.com.kriche.minesweeper.util.RandomService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,12 +32,14 @@ public class GameService {
     private RandomService randomService;
     private Game theCurrentGame;
 
+    @Autowired
+    private GameRepository gameRepo;
 
     @Autowired
-    public GameService(RandomService randomService) {
+    public GameService(RandomService randomService, GameRepository gameRepository) {
         this.randomService = randomService;
+        this.gameRepo = gameRepository;
     }
-
 
     public Game getGame() {
         if (theCurrentGame == null) {

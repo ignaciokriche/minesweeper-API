@@ -1,5 +1,6 @@
 package ar.com.kriche.minesweeper.domain;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -10,15 +11,29 @@ import java.util.stream.Stream;
  *
  * @Author Kriche 2020
  */
+@Entity
+@Table(name = "game")
 public class Game {
 
-    private final int rowSize;
-    private final int columnSize;
-    private final int mines;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private int rowSize;
+    private int columnSize;
+    private int mines;
     private int availableFlags;
     private int revealedCells;
-    private final List<BoardRow> board;
     private GameState state;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BoardRow> board;
+
+    /**
+     * for ORM only.
+     */
+    protected Game() {
+    }
 
     public Game(int rows, int columns, int mines) {
         this.rowSize = rows;
@@ -28,6 +43,10 @@ public class Game {
         this.revealedCells = 0;
         this.board = new ArrayList<>(rows);
         this.state = GameState.IN_PROGRESS;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public int getRowSize() {

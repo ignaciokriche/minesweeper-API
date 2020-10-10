@@ -1,16 +1,31 @@
 package ar.com.kriche.minesweeper.domain;
 
+import javax.persistence.*;
+
 import static ar.com.kriche.minesweeper.domain.CellState.REVEALED;
 import static ar.com.kriche.minesweeper.domain.CellState.UNREVEALED_NO_MARK;
 
 /**
  * @Author Kriche 2020
  */
+@Entity
+@Table(name = "cell")
 public class Cell {
 
-    private final boolean mined;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private boolean mined;
     private int adjacentMines;
+    @Enumerated(EnumType.STRING)
     private CellState state;
+
+    /**
+     * ORM only.
+     */
+    protected Cell() {
+    }
 
     public Cell(boolean mined) {
         this.mined = mined;
