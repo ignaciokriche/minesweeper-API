@@ -5,7 +5,7 @@ import ar.com.kriche.minesweeper.domain.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import static ar.com.kriche.minesweeper.domain.CellMark.*;
+import static ar.com.kriche.minesweeper.domain.CellState.*;
 
 /**
  * API entry point for playing the game.

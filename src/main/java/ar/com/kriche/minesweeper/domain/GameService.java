@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static ar.com.kriche.minesweeper.domain.CellMark.REVEALED;
-import static ar.com.kriche.minesweeper.domain.CellMark.UNREVEALED_RED_FLAG_MARK;
+import static ar.com.kriche.minesweeper.domain.CellState.REVEALED;
+import static ar.com.kriche.minesweeper.domain.CellState.UNREVEALED_RED_FLAG_MARK;
 import static ar.com.kriche.minesweeper.domain.GameState.USER_LOST;
 import static ar.com.kriche.minesweeper.domain.GameState.USER_WON;
 
@@ -63,7 +63,7 @@ public class GameService {
         validateGameInProgress(game, "cannot reveal a cell of a game not in progress.");
         Cell cell = game.cellAt(row, column);
         validateCellNotRevealed(cell, "cannot reveal a cell already revealed.");
-        if (cell.getMark() == UNREVEALED_RED_FLAG_MARK) {
+        if (cell.getState() == UNREVEALED_RED_FLAG_MARK) {
             throw new IllegalStateException("cannot reveal a cell marked with a flag. Remove flag first.");
         }
         if (cell.isMined()) {
@@ -87,12 +87,12 @@ public class GameService {
      * @param column
      * @return
      */
-    public Game markCell(Game game, int row, int column, CellMark mark) {
+    public Game markCell(Game game, int row, int column, CellState mark) {
         LOGGER.debug("mark cell [" + row + "," + column + "] with: " + mark);
         validateGameInProgress(game, "cannot mark cell of a game not in progress.");
         Cell cell = game.cellAt(row, column);
         validateCellNotRevealed(cell, "cannot modify a revealed cell.");
-        if (cell.getMark() == mark) {
+        if (cell.getState() == mark) {
             throw new IllegalStateException("cell already marked as: " + mark);
         }
         markCellAndUpdateGameCounters(mark, cell, game);
@@ -160,24 +160,24 @@ public class GameService {
 
 
     /**
-     * updates cell mark and available flags and revealed cell counters accordingly.
+     * updates cell state and available flags and revealed cell counters accordingly.
      * use only this method to mutate a cell mark!
      *
-     * @param mark
+     * @param state
      * @param cell
      * @param game
      */
-    private void markCellAndUpdateGameCounters(CellMark mark, Cell cell, Game game) {
+    private void markCellAndUpdateGameCounters(CellState state, Cell cell, Game game) {
 
-        if (mark == cell.getMark()) {
+        if (state == cell.getState()) {
             return;
         }
 
-        switch (mark) {
+        switch (state) {
 
             case UNREVEALED_RED_FLAG_MARK:
                 if (game.getAvailableFlags() == 0) {
-                    throw new IllegalStateException("No available flags." + mark);
+                    throw new IllegalStateException("No available flags.");
                 }
                 // setting a flag decreases available flags.
                 game.decreaseAvailableFlags();
@@ -189,16 +189,16 @@ public class GameService {
             case UNREVEALED_NO_MARK:
             case UNREVEALED_QUESTION_MARK:
                 // for these 3 cases above if there was a flag then available flags must increase.
-                if (cell.getMark() == UNREVEALED_RED_FLAG_MARK) {
+                if (cell.getState() == UNREVEALED_RED_FLAG_MARK) {
                     game.increaseAvailableFlags();
                 }
                 break;
 
             default:
-                throw new Error("unknown mark:" + mark);
+                throw new Error("unknown state:" + state);
         }
 
-        cell.setMark(mark);
+        cell.setState(state);
 
     }
 

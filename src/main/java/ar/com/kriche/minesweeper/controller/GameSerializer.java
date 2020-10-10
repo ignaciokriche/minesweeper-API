@@ -30,12 +30,10 @@ public class GameSerializer extends JsonSerializer<Game> {
         Function<Cell, CellDTO> cellToCellDTO;
         if (game.getState() == IN_PROGRESS) {
             // while in progress don't tell if a cell is mined and show adjacent mines only if the cell is revealed:
-            cellToCellDTO =
-                    cell -> new CellDTO(null, cell.isRevealed() ? cell.getAdjacentMines() : null, cell.getMark());
+            cellToCellDTO = cell -> new CellDTO(null, cell.isRevealed() ? cell.getAdjacentMines() : null, cell.getState());
         } else {
             // game finished: good to show all the information.
-            cellToCellDTO =
-                    cell -> new CellDTO(cell.isMined(), cell.getAdjacentMines(), cell.getMark());
+            cellToCellDTO = cell -> new CellDTO(cell.isMined(), cell.getAdjacentMines(), cell.getState());
         }
         jsonGenerator.writeObjectField("board",
                 game.getBoard().stream().map(r -> r.getCells().stream().map(cell -> cellToCellDTO.apply(cell))));

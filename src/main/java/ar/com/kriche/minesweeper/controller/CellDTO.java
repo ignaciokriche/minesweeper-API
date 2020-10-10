@@ -1,6 +1,6 @@
 package ar.com.kriche.minesweeper.controller;
 
-import ar.com.kriche.minesweeper.domain.CellMark;
+import ar.com.kriche.minesweeper.domain.CellState;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -8,12 +8,12 @@ public class CellDTO {
 
     private Boolean mined;
     private Integer adjacentMines;
-    private CellMark mark;
+    private CellState state;
 
-    public CellDTO(Boolean mined, Integer adjacentMines, CellMark mark) {
+    public CellDTO(Boolean mined, Integer adjacentMines, CellState state) {
         this.mined = mined;
         this.adjacentMines = adjacentMines;
-        this.mark = mark;
+        this.state = state;
     }
 
     public Boolean getMined() {
@@ -24,8 +24,8 @@ public class CellDTO {
         return adjacentMines;
     }
 
-    public CellMark getMark() {
-        return mark;
+    public CellState getState() {
+        return state;
     }
 
 }

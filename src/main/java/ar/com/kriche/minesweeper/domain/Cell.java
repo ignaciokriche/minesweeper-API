@@ -1,7 +1,7 @@
 package ar.com.kriche.minesweeper.domain;
 
-import static ar.com.kriche.minesweeper.domain.CellMark.REVEALED;
-import static ar.com.kriche.minesweeper.domain.CellMark.UNREVEALED_NO_MARK;
+import static ar.com.kriche.minesweeper.domain.CellState.REVEALED;
+import static ar.com.kriche.minesweeper.domain.CellState.UNREVEALED_NO_MARK;
 
 /**
  * @Author Kriche 2020
@@ -10,11 +10,11 @@ public class Cell {
 
     private final boolean mined;
     private int adjacentMines;
-    private CellMark mark;
+    private CellState state;
 
     public Cell(boolean mined) {
         this.mined = mined;
-        this.mark = UNREVEALED_NO_MARK;
+        this.state = UNREVEALED_NO_MARK;
     }
 
     public boolean isMined() {
@@ -29,21 +29,21 @@ public class Cell {
         this.adjacentMines = adjacentMines;
     }
 
-    public CellMark getMark() {
-        return mark;
+    public CellState getState() {
+        return state;
     }
 
-    public void setMark(CellMark mark) {
-        this.mark = mark;
+    public void setState(CellState state) {
+        this.state = state;
     }
 
     public boolean isRevealed() {
-        return this.getMark() == REVEALED;
+        return this.getState() == REVEALED;
     }
 
     @Override
     public String toString() {
-        switch (getMark()) {
+        switch (getState()) {
             case UNREVEALED_NO_MARK:
                 return "* ";
             case UNREVEALED_RED_FLAG_MARK:
@@ -56,7 +56,7 @@ public class Cell {
                 }
                 return getAdjacentMines() + " ";
         }
-        throw new Error("unknown mark:" + getMark());
+        throw new Error("unknown state:" + getState());
     }
 
 }
