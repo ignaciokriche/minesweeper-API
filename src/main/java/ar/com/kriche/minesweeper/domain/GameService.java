@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ import static ar.com.kriche.minesweeper.domain.GameState.USER_WON;
  * @Author Kriche 2020
  */
 @Service
+@Transactional
 public class GameService {
 
     private static final Log LOGGER = LogFactory.getLog(GameService.class);
@@ -30,9 +32,6 @@ public class GameService {
     private static final int DEFAULT_TOTAL_MINES = 7;
 
     private RandomService randomService;
-    private Game theCurrentGame;
-
-    @Autowired
     private GameRepository gameRepo;
 
     @Autowired
@@ -41,28 +40,40 @@ public class GameService {
         this.gameRepo = gameRepository;
     }
 
-    public Game getGame() {
-        if (theCurrentGame == null) {
-            initializeGame();
-        }
+    /**
+     * @return a newly created game.
+     */
+    public Game newGame() {
+        Game theGame = initializeGame();
+        theGame = gameRepo.save(theGame);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("returning game:\n" + theCurrentGame);
+            LOGGER.debug("\nreturning new game:\n" + theGame);
         }
-        return theCurrentGame;
+        return theGame;
     }
 
-    void initializeGame() {
-        this.theCurrentGame = initializeGame(DEFAULT_ROW_SIZE, DEFAULT_COLUMN_SIZE, DEFAULT_TOTAL_MINES);
+
+    /**
+     * @param gameId
+     * @return
+     */
+    public Game getGame(Long gameId) {
+        Game theGame = gameRepo.getOne(gameId);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\nreturning existing game:\n" + theGame);
+        }
+        return theGame;
     }
 
     /**
-     * @param game
+     * @param gameId
      * @param row
      * @param column
      * @return
      */
-    public Game revealCell(Game game, int row, int column) {
+    public Game revealCell(Long gameId, int row, int column) {
         LOGGER.debug("reveal cell [" + row + "," + column + "].");
+        Game game = gameRepo.getOne(gameId);
         validateGameInProgress(game, "cannot reveal a cell of a game not in progress.");
         Cell cell = game.cellAt(row, column);
         validateCellNotRevealed(cell, "cannot reveal a cell already revealed.");
@@ -83,15 +94,15 @@ public class GameService {
         return game;
     }
 
-
     /**
-     * @param game
+     * @param gameId
      * @param row
      * @param column
      * @return
      */
-    public Game markCell(Game game, int row, int column, CellState mark) {
+    public Game markCell(Long gameId, int row, int column, CellState mark) {
         LOGGER.debug("mark cell [" + row + "," + column + "] with: " + mark);
+        Game game = gameRepo.getOne(gameId);
         validateGameInProgress(game, "cannot mark cell of a game not in progress.");
         Cell cell = game.cellAt(row, column);
         validateCellNotRevealed(cell, "cannot modify a revealed cell.");
@@ -100,6 +111,10 @@ public class GameService {
         }
         markCellAndUpdateGameCounters(mark, cell, game);
         return game;
+    }
+
+    private Game initializeGame() {
+        return initializeGame(DEFAULT_ROW_SIZE, DEFAULT_COLUMN_SIZE, DEFAULT_TOTAL_MINES);
     }
 
     private Game initializeGame(int rowSize, int columnSize, int mines) {
@@ -160,7 +175,6 @@ public class GameService {
             }
         }
     }
-
 
     /**
      * updates cell state and available flags and revealed cell counters accordingly.

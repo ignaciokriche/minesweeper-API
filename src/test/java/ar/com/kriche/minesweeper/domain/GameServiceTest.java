@@ -8,6 +8,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,8 +20,8 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
-
 @SpringBootTest
+@Transactional
 public class GameServiceTest {
 
     private static final Log LOGGER = LogFactory.getLog(GameServiceTest.class);
@@ -67,8 +68,7 @@ public class GameServiceTest {
         Mockito.when(randomService.shuffledBooleans(anyInt(), anyInt())).thenReturn(mineLocations);
 
         // exercise:
-        theTested.initializeGame();
-        Game game = theTested.getGame();
+        Game game = theTested.newGame();
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("\ngame:\n" + game);
         }
@@ -101,8 +101,7 @@ public class GameServiceTest {
         Mockito.when(randomService.shuffledBooleans(anyInt(), anyInt())).thenReturn(minesLocationFlatted);
 
         // exercise:
-        theTested.initializeGame();
-        Game game = theTested.getGame();
+        Game game = theTested.newGame();
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("actual game:\n" + game);
         }
@@ -143,7 +142,7 @@ public class GameServiceTest {
         };
 
         testMove(mineLocations,
-                (game) -> theTested.revealCell(game, 2, 2),
+                (game) -> theTested.revealCell(game.getId(), 2, 2),
                 cell -> cell.isRevealed(),
                 expectedRevealed);
     }
@@ -178,7 +177,7 @@ public class GameServiceTest {
         };
 
         testMove(mineLocations,
-                (game) -> theTested.revealCell(game, 3, 4),
+                (game) -> theTested.revealCell(game.getId(), 3, 4),
                 cell -> cell.isRevealed(),
                 expectedRevealed);
     }
@@ -214,7 +213,7 @@ public class GameServiceTest {
         };
 
         testMove(mineLocations,
-                (game) -> theTested.revealCell(game, 2, 2),
+                (game) -> theTested.revealCell(game.getId(), 2, 2),
                 cell -> cell.isRevealed(),
                 expectedRevealed);
     }
@@ -249,7 +248,7 @@ public class GameServiceTest {
         };
 
         testMove(mineLocations,
-                (game) -> theTested.revealCell(game, 3, 3),
+                (game) -> theTested.revealCell(game.getId(), 3, 3),
                 cell -> cell.isRevealed(),
                 expectedRevealed);
     }
@@ -284,7 +283,7 @@ public class GameServiceTest {
         };
 
         testMove(mineLocations,
-                (game) -> theTested.revealCell(game, 0, 0),
+                (game) -> theTested.revealCell(game.getId(), 0, 0),
                 cell -> cell.isRevealed(),
                 expectedRevealed);
     }
@@ -306,13 +305,12 @@ public class GameServiceTest {
                               R[][] expectedResults) {
         // setup:
         when(randomService.shuffledBooleans(anyInt(), anyInt())).thenReturn(mineLocations);
-        theTested.initializeGame();
-        Game game = theTested.getGame();
+        Game game = theTested.newGame();
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("\ngame before move:\n" + game);
         }
 
-        //exercise:
+        // exercise:
         game = moveMaker.apply(game);
 
         // verify:

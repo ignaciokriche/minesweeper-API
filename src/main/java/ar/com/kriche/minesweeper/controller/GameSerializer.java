@@ -20,6 +20,7 @@ public class GameSerializer extends JsonSerializer<Game> {
 
         jsonGenerator.writeStartObject();
 
+        jsonGenerator.writeNumberField("id", game.getId());
         jsonGenerator.writeObjectField("state", game.getState());
         jsonGenerator.writeNumberField("rows", game.getRowSize());
         jsonGenerator.writeNumberField("columns", game.getColumnSize());

@@ -135,6 +135,9 @@ public class Game {
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("id: ");
+        stringBuilder.append(getId());
+        stringBuilder.append('\n');
         board.forEach(r -> {
             r.getCells().forEach(cell -> stringBuilder.append(cell));
             stringBuilder.append('\n');

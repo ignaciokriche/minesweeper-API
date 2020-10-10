@@ -20,11 +20,19 @@ public class GameController {
     private GameService gameService;
 
     /**
-     * @return the existing game.
+     * @return a new game.
      */
-    @GetMapping()
-    public Game getGame() {
-        return gameService.getGame();
+    @PostMapping
+    public Game createGame() {
+        return gameService.newGame();
+    }
+
+    /**
+     * @return the existing game by <code>id</code>.
+     */
+    @GetMapping("/{id}")
+    public Game getGame(@PathVariable("id") Long id) {
+        return gameService.getGame(id);
     }
 
     /**
@@ -33,20 +41,23 @@ public class GameController {
      * @param move   type of move to make.
      * @return the updated game.
      */
-    @PatchMapping("/board/{row}/{column}")
-    public Game makeMove(@PathVariable("row") int row,
+    @PatchMapping("/{id}/board/{row}/{column}")
+    public Game makeMove(@PathVariable("id") Long gameId,
+                         @PathVariable("row") int row,
                          @PathVariable("column") int column,
                          @RequestBody MoveDTO move) {
+
         // TODO validations and errors.
+
         switch (move.getType()) {
             case REVEAL:
-                return gameService.revealCell(getGame(), row, column);
+                return gameService.revealCell(gameId, row, column);
             case MARK_QUESTION:
-                return gameService.markCell(getGame(), row, column, UNREVEALED_QUESTION_MARK);
+                return gameService.markCell(gameId, row, column, UNREVEALED_QUESTION_MARK);
             case MARK_RED_FLAG:
-                return gameService.markCell(getGame(), row, column, UNREVEALED_RED_FLAG_MARK);
+                return gameService.markCell(gameId, row, column, UNREVEALED_RED_FLAG_MARK);
             case REMOVE_MARK:
-                return gameService.markCell(getGame(), row, column, UNREVEALED_NO_MARK);
+                return gameService.markCell(gameId, row, column, UNREVEALED_NO_MARK);
             default:
                 throw new IllegalArgumentException("unknown type: " + move.getType());
         }
