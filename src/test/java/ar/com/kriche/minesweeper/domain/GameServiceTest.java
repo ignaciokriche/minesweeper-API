@@ -68,7 +68,7 @@ public class GameServiceTest {
         Mockito.when(randomService.shuffledBooleans(anyInt(), anyInt())).thenReturn(mineLocations);
 
         // exercise:
-        Game game = theTested.newGame();
+        Game game = getGame();
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("\ngame:\n" + game);
         }
@@ -101,7 +101,7 @@ public class GameServiceTest {
         Mockito.when(randomService.shuffledBooleans(anyInt(), anyInt())).thenReturn(minesLocationFlatted);
 
         // exercise:
-        Game game = theTested.newGame();
+        Game game = getGame();
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("actual game:\n" + game);
         }
@@ -110,7 +110,6 @@ public class GameServiceTest {
         Mockito.verify(randomService).shuffledBooleans(game.getMines(), minesLocationFlatted.size());
 
     }
-
 
     @Test
     public void givenNoMinesWhenRevealingThenItMustPropagateToAllCells() {
@@ -288,7 +287,6 @@ public class GameServiceTest {
                 expectedRevealed);
     }
 
-
     /**
      * setups a game with <code>mineLocations</code>, makes the move calling <code>moveMaker</code> and checks the
      * result against <code>expectedResults</code>.
@@ -305,7 +303,7 @@ public class GameServiceTest {
                               R[][] expectedResults) {
         // setup:
         when(randomService.shuffledBooleans(anyInt(), anyInt())).thenReturn(mineLocations);
-        Game game = theTested.newGame();
+        Game game = getGame();
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("\ngame before move:\n" + game);
         }
@@ -319,6 +317,10 @@ public class GameServiceTest {
         }
         verifyCells(expectedResults, game, cellMapper);
         Mockito.verify(randomService).shuffledBooleans(game.getMines(), mineLocations.size());
+    }
+
+    private Game getGame() {
+        return theTested.newGame(10, 10, 10);
     }
 
     /**

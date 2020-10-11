@@ -5,6 +5,7 @@ import ar.com.kriche.minesweeper.util.RandomService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,12 +27,16 @@ public class GameService {
 
     private static final Log LOGGER = LogFactory.getLog(GameService.class);
 
-    private static final int DEFAULT_ROW_SIZE = 10;
-    private static final int DEFAULT_COLUMN_SIZE = 10;
-    private static final int DEFAULT_TOTAL_MINES = 7;
+    @Value("${game.default.rows}")
+    private int defaultRowSize;
+    @Value("${game.default.columns}")
+    private int defaultColumnSize;
+    @Value("${game.default.mines}")
+    private int defaultMines;
 
     private RandomService randomService;
     private GameRepository gameRepo;
+
 
     @Autowired
     public GameService(RandomService randomService, GameRepository gameRepository) {
@@ -43,14 +48,23 @@ public class GameService {
      * @return a newly created game.
      */
     public Game newGame() {
-        Game theGame = initializeGame();
+        return newGame(defaultRowSize, defaultColumnSize, defaultMines);
+    }
+
+    /**
+     * @param rows
+     * @param columns
+     * @param mines
+     * @return a newly created game with the given parameters.
+     */
+    public Game newGame(int rows, int columns, int mines) {
+        Game theGame = initializeGame(rows, columns, mines);
         theGame = gameRepo.save(theGame);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("\nreturning new game:\n" + theGame);
         }
         return theGame;
     }
-
 
     /**
      * @param gameId
@@ -130,10 +144,6 @@ public class GameService {
         }
         markCellAndUpdateGameCounters(mark, cell, game);
         return game;
-    }
-
-    private Game initializeGame() {
-        return initializeGame(DEFAULT_ROW_SIZE, DEFAULT_COLUMN_SIZE, DEFAULT_TOTAL_MINES);
     }
 
     private Game initializeGame(int rowSize, int columnSize, int mines) {

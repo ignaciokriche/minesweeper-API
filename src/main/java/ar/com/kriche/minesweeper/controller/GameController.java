@@ -31,6 +31,16 @@ public class GameController {
     }
 
     /**
+     * @return a new game.
+     */
+    @PostMapping("/{rows}/{columns}/{mines}")
+    public Game createCustomGame(@PathVariable("rows") int rows,
+                                 @PathVariable("columns") int columns,
+                                 @PathVariable("mines") int mines) {
+        return gameService.newGame(rows, columns, mines);
+    }
+
+    /**
      * @param id the game id.
      * @return the existing game by <code>id</code>.
      */
