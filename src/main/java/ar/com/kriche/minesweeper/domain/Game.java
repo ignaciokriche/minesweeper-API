@@ -26,6 +26,7 @@ public class Game {
     private int mines;
     private int availableFlags;
     private int revealedCells;
+    @Enumerated(EnumType.STRING)
     private GameState state;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private SimpleTimeTracker timeTracker;
