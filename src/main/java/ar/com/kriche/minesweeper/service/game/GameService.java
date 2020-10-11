@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static ar.com.kriche.minesweeper.domain.CellState.REVEALED;
 import static ar.com.kriche.minesweeper.domain.CellState.UNREVEALED_RED_FLAG_MARK;
@@ -34,6 +35,10 @@ public class GameService {
     private int defaultColumnSize;
     @Value("${service.game.gameService.defaultMines}")
     private int defaultMines;
+    @Value("${service.game.gameService.maxRowSize}")
+    private int maxRowSize;
+    @Value("${service.game.gameService.maxColumnSize}")
+    private int maxColumnSize;
 
     private RandomService randomService;
     private GameRepository gameRepo;
@@ -73,7 +78,7 @@ public class GameService {
      * @return the game with id: <code>gameId</code>
      */
     public Game getGame(Long gameId) {
-        Game theGame = gameRepo.getOne(gameId);
+        Game theGame = validateAndGetGame(gameId);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("\nreturning existing game:\n" + theGame);
         }
@@ -85,7 +90,7 @@ public class GameService {
      */
     public void pauseGame(Long gameId) {
         LOGGER.debug("pausing game with id: " + gameId);
-        Game game = gameRepo.getOne(gameId);
+        Game game = validateAndGetGame(gameId);
         validateGameInProgress(game, "cannot pause a game not in progress.");
         game.setState(PAUSED);
     }
@@ -95,7 +100,7 @@ public class GameService {
      */
     public void resumeGame(Long gameId) {
         LOGGER.debug("resuming game with id: " + gameId);
-        Game game = gameRepo.getOne(gameId);
+        Game game = validateAndGetGame(gameId);
         validateGamePaused(game, "cannot resume a game not paused");
         game.setState(IN_PROGRESS);
     }
@@ -108,12 +113,12 @@ public class GameService {
      */
     public Game revealCell(Long gameId, int row, int column) {
         LOGGER.debug("reveal cell [" + row + "," + column + "].");
-        Game game = gameRepo.getOne(gameId);
+        Game game = validateAndGetGame(gameId);
         validateGameInProgress(game, "cannot reveal a cell of a game not in progress.");
         Cell cell = game.cellAt(row, column);
         validateCellNotRevealed(cell, "cannot reveal a cell already revealed.");
         if (cell.getState() == UNREVEALED_RED_FLAG_MARK) {
-            throw new IllegalStateException("cannot reveal a cell marked with a flag. Remove flag first.");
+            throw new IllegalGameActionException("cannot reveal a cell marked with a flag. Remove flag first.");
         }
         if (cell.isMined()) {
             markCellAndUpdateGameCounters(REVEALED, cell, game);
@@ -137,18 +142,20 @@ public class GameService {
      */
     public Game markCell(Long gameId, int row, int column, CellState mark) {
         LOGGER.debug("mark cell [" + row + "," + column + "] with: " + mark);
-        Game game = gameRepo.getOne(gameId);
+        Game game = validateAndGetGame(gameId);
         validateGameInProgress(game, "cannot mark cell of a game not in progress.");
         Cell cell = game.cellAt(row, column);
         validateCellNotRevealed(cell, "cannot modify a revealed cell.");
         if (cell.getState() == mark) {
-            throw new IllegalStateException("cell already marked as: " + mark);
+            throw new IllegalGameActionException("cell already marked as: " + mark);
         }
         markCellAndUpdateGameCounters(mark, cell, game);
         return game;
     }
 
     private Game initializeGame(Player owner, int rowSize, int columnSize, int mines) {
+
+        validateGameParameters(rowSize, columnSize, mines);
 
         Game game = new Game(owner, rowSize, columnSize, mines);
 
@@ -178,21 +185,41 @@ public class GameService {
         return game;
     }
 
+    private void validateGameParameters(int rowSize, int columnSize, int mines) {
+        if (rowSize <= 0 || rowSize > maxRowSize) {
+            throw new IllegalGameConfigurationException("invalid rows parameter.");
+        }
+        if (columnSize <= 0 || columnSize > maxColumnSize) {
+            throw new IllegalGameConfigurationException("invalid columns parameter.");
+        }
+        if (mines < 0 || mines > rowSize * columnSize) {
+            throw new IllegalGameConfigurationException("invalid mines parameter.");
+        }
+    }
+
+    private Game validateAndGetGame(Long gameId) {
+        Optional<Game> game = gameRepo.findById(gameId);
+        if (!game.isPresent()) {
+            new GameNotFoundException("game not found.");
+        }
+        return game.get();
+    }
+
     private void validateCellNotRevealed(Cell cell, String errMsg) {
         if (cell.isRevealed()) {
-            throw new IllegalStateException(errMsg);
+            throw new IllegalGameActionException(errMsg);
         }
     }
 
     private void validateGameInProgress(Game game, String errMsg) {
         if (!game.isInProgress()) {
-            throw new IllegalStateException(errMsg);
+            throw new IllegalGameActionException(errMsg);
         }
     }
 
     private void validateGamePaused(Game game, String errMsg) {
         if (!game.isPaused()) {
-            throw new IllegalStateException(errMsg);
+            throw new IllegalGameActionException(errMsg);
         }
     }
 
@@ -231,7 +258,7 @@ public class GameService {
 
             case UNREVEALED_RED_FLAG_MARK:
                 if (game.getAvailableFlags() == 0) {
-                    throw new IllegalStateException("No available flags.");
+                    throw new IllegalGameActionException("No available flags.");
                 }
                 // setting a flag decreases available flags.
                 game.decreaseAvailableFlags();
@@ -249,6 +276,7 @@ public class GameService {
                 break;
 
             default:
+                //should never happen
                 throw new Error("unknown state:" + state);
         }
 

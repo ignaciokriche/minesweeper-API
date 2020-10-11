@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 import static ar.com.kriche.minesweeper.domain.CellState.*;
 
@@ -21,8 +23,6 @@ import static ar.com.kriche.minesweeper.domain.CellState.*;
 @Transactional // tx here since this controller works with 2 services and we want to keep all calls within the same tx.
 public class GameController {
 
-    // TODO validations and errors.
-
     @Autowired
     private GameService gameService;
 
@@ -30,7 +30,6 @@ public class GameController {
     private PlayerService playerService;
 
     /**
-     *
      * @param userName of an existing user.
      * @return a new game.
      */
@@ -41,7 +40,6 @@ public class GameController {
     }
 
     /**
-     *
      * @param userName of an existing user.
      * @param rows
      * @param columns
@@ -51,8 +49,11 @@ public class GameController {
     @PostMapping("/{userName}/{rows}/{columns}/{mines}")
     public Game createCustomGame(
             @PathVariable("userName") String userName,
+            @Min(1) @Max(50)
             @PathVariable("rows") int rows,
+            @Min(1) @Max(50)
             @PathVariable("columns") int columns,
+            @Min(0)
             @PathVariable("mines") int mines) {
         Player player = playerService.getPlayerByUserName(userName);
         return gameService.newGame(player, rows, columns, mines);
@@ -114,6 +115,7 @@ public class GameController {
             case REMOVE_MARK:
                 return gameService.markCell(gameId, row, column, UNREVEALED_NO_MARK);
             default:
+                // should never happen
                 throw new IllegalArgumentException("unknown type: " + move.getType());
         }
     }
