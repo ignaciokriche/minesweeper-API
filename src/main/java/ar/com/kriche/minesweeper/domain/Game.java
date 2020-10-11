@@ -124,6 +124,10 @@ public class Game {
         return getState() == PAUSED;
     }
 
+    public long getElapsedTimeMilliseconds() {
+        return timeTracker.getAccumulatedTimeMilliseconds();
+    }
+
     public Stream<CellCoordinate> getNeighbours(int cellRow, int cellColumn) {
 
         Stream.Builder<CellCoordinate> neighbours = Stream.builder();

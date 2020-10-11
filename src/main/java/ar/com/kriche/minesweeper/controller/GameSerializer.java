@@ -27,6 +27,7 @@ public class GameSerializer extends JsonSerializer<Game> {
         jsonGenerator.writeNumberField("mines", game.getMines());
         jsonGenerator.writeNumberField("availableFlags", game.getAvailableFlags());
         jsonGenerator.writeNumberField("revealedCells", game.getRevealedCells());
+        jsonGenerator.writeNumberField("elapsedTimeMilliseconds", game.getElapsedTimeMilliseconds());
 
         Function<Cell, CellDTO> cellToCellDTO;
         if (game.getState() == IN_PROGRESS) {
