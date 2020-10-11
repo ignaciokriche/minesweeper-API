@@ -1,9 +1,6 @@
 package ar.com.kriche.minesweeper.service;
 
-import ar.com.kriche.minesweeper.domain.BoardRow;
-import ar.com.kriche.minesweeper.domain.Cell;
-import ar.com.kriche.minesweeper.domain.CellState;
-import ar.com.kriche.minesweeper.domain.Game;
+import ar.com.kriche.minesweeper.domain.*;
 import ar.com.kriche.minesweeper.repository.GameRepository;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,8 +47,8 @@ public class GameService {
     /**
      * @return a newly created game.
      */
-    public Game newGame() {
-        return newGame(defaultRowSize, defaultColumnSize, defaultMines);
+    public Game newGame(Player owner) {
+        return newGame(owner, defaultRowSize, defaultColumnSize, defaultMines);
     }
 
     /**
@@ -60,8 +57,9 @@ public class GameService {
      * @param mines
      * @return a newly created game with the given parameters.
      */
-    public Game newGame(int rows, int columns, int mines) {
-        Game theGame = initializeGame(rows, columns, mines);
+    public Game newGame(Player owner, int rows, int columns, int mines) {
+        Game theGame = initializeGame(owner, rows, columns, mines);
+        owner.addGame(theGame);
         theGame = gameRepo.save(theGame);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("\nreturning new game:\n" + theGame);
@@ -149,9 +147,9 @@ public class GameService {
         return game;
     }
 
-    private Game initializeGame(int rowSize, int columnSize, int mines) {
+    private Game initializeGame(Player owner, int rowSize, int columnSize, int mines) {
 
-        Game game = new Game(rowSize, columnSize, mines);
+        Game game = new Game(owner, rowSize, columnSize, mines);
 
         // iterate the board once to instantiate the cells randomly assigning the mines:
         List<Boolean> rndBooleans = randomService.shuffledBooleans(mines, rowSize * columnSize);

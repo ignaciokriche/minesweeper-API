@@ -33,4 +33,8 @@ public class Player {
         return games;
     }
 
+    public void addGame(Game game) {
+        getGames().add(game);
+    }
+
 }

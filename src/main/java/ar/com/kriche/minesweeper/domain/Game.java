@@ -40,7 +40,8 @@ public class Game {
     protected Game() {
     }
 
-    public Game(int rows, int columns, int mines) {
+    public Game(Player player, int rows, int columns, int mines) {
+        this.player = player;
         this.rowSize = rows;
         this.columnSize = columns;
         this.mines = mines;

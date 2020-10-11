@@ -1,9 +1,12 @@
 package ar.com.kriche.minesweeper.controller;
 
 import ar.com.kriche.minesweeper.domain.Game;
+import ar.com.kriche.minesweeper.domain.Player;
 import ar.com.kriche.minesweeper.service.GameService;
+import ar.com.kriche.minesweeper.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import static ar.com.kriche.minesweeper.domain.CellState.*;
@@ -15,6 +18,7 @@ import static ar.com.kriche.minesweeper.domain.CellState.*;
  */
 @RestController
 @RequestMapping("/game")
+@Transactional // tx here since this controller works with 2 services and we want to keep all calls within the same tx.
 public class GameController {
 
     // TODO validations and errors.
@@ -22,22 +26,36 @@ public class GameController {
     @Autowired
     private GameService gameService;
 
+    @Autowired
+    private PlayerService playerService;
+
     /**
+     *
+     * @param userName of an existing user.
      * @return a new game.
      */
-    @PostMapping
-    public Game createGame() {
-        return gameService.newGame();
+    @PostMapping("/{userName}")
+    public Game createGame(@PathVariable("userName") String userName) {
+        Player player = playerService.getPlayerByUserName(userName);
+        return gameService.newGame(player);
     }
 
     /**
-     * @return a new game.
+     *
+     * @param userName of an existing user.
+     * @param rows
+     * @param columns
+     * @param mines
+     * @return
      */
-    @PostMapping("/{rows}/{columns}/{mines}")
-    public Game createCustomGame(@PathVariable("rows") int rows,
-                                 @PathVariable("columns") int columns,
-                                 @PathVariable("mines") int mines) {
-        return gameService.newGame(rows, columns, mines);
+    @PostMapping("/{userName}/{rows}/{columns}/{mines}")
+    public Game createCustomGame(
+            @PathVariable("userName") String userName,
+            @PathVariable("rows") int rows,
+            @PathVariable("columns") int columns,
+            @PathVariable("mines") int mines) {
+        Player player = playerService.getPlayerByUserName(userName);
+        return gameService.newGame(player, rows, columns, mines);
     }
 
     /**

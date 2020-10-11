@@ -2,6 +2,7 @@ package ar.com.kriche.minesweeper.domain.service;
 
 import ar.com.kriche.minesweeper.domain.Cell;
 import ar.com.kriche.minesweeper.domain.Game;
+import ar.com.kriche.minesweeper.domain.Player;
 import ar.com.kriche.minesweeper.service.GameService;
 import ar.com.kriche.minesweeper.service.RandomService;
 import org.apache.commons.logging.Log;
@@ -323,7 +324,7 @@ public class GameServiceTest {
     }
 
     private Game getGame() {
-        return theTested.newGame(10, 10, 10);
+        return theTested.newGame(new Player("kriche"), 10, 10, 10);
     }
 
     /**
