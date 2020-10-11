@@ -30,11 +30,11 @@ public class GameService {
 
     private static final Log LOGGER = LogFactory.getLog(GameService.class);
 
-    @Value("${game.default.rows}")
+    @Value("${service.gameService.defaultRowSize}")
     private int defaultRowSize;
-    @Value("${game.default.columns}")
+    @Value("${service.gameService.defaultColumnSize}")
     private int defaultColumnSize;
-    @Value("${game.default.mines}")
+    @Value("${service.gameService.defaultMines}")
     private int defaultMines;
 
     private RandomService randomService;
