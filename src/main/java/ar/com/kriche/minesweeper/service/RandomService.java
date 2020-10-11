@@ -1,4 +1,4 @@
-package ar.com.kriche.minesweeper.util;
+package ar.com.kriche.minesweeper.service;
 
 import org.springframework.stereotype.Service;
 

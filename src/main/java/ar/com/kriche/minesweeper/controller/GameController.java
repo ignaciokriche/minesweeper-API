@@ -1,7 +1,7 @@
 package ar.com.kriche.minesweeper.controller;
 
 import ar.com.kriche.minesweeper.domain.Game;
-import ar.com.kriche.minesweeper.domain.GameService;
+import ar.com.kriche.minesweeper.service.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,6 +1,9 @@
-package ar.com.kriche.minesweeper.domain;
+package ar.com.kriche.minesweeper.domain.service;
 
-import ar.com.kriche.minesweeper.util.RandomService;
+import ar.com.kriche.minesweeper.domain.Cell;
+import ar.com.kriche.minesweeper.domain.Game;
+import ar.com.kriche.minesweeper.service.GameService;
+import ar.com.kriche.minesweeper.service.RandomService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,10 @@
-package ar.com.kriche.minesweeper.domain;
+package ar.com.kriche.minesweeper.service;
 
+import ar.com.kriche.minesweeper.domain.BoardRow;
+import ar.com.kriche.minesweeper.domain.Cell;
+import ar.com.kriche.minesweeper.domain.CellState;
+import ar.com.kriche.minesweeper.domain.Game;
 import ar.com.kriche.minesweeper.repository.GameRepository;
-import ar.com.kriche.minesweeper.util.RandomService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
