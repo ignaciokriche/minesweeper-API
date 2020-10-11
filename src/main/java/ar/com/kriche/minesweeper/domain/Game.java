@@ -31,6 +31,8 @@ public class Game {
     private SimpleTimeTracker timeTracker;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoardRow> board;
+    @ManyToOne
+    private Player player;
 
     /**
      * for ORM only.
@@ -53,6 +55,10 @@ public class Game {
 
     public Long getId() {
         return id;
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 
     public int getRowSize() {
