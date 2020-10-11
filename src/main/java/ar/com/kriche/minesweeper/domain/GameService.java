@@ -12,8 +12,7 @@ import java.util.List;
 
 import static ar.com.kriche.minesweeper.domain.CellState.REVEALED;
 import static ar.com.kriche.minesweeper.domain.CellState.UNREVEALED_RED_FLAG_MARK;
-import static ar.com.kriche.minesweeper.domain.GameState.USER_LOST;
-import static ar.com.kriche.minesweeper.domain.GameState.USER_WON;
+import static ar.com.kriche.minesweeper.domain.GameState.*;
 
 
 /**
@@ -55,7 +54,7 @@ public class GameService {
 
     /**
      * @param gameId
-     * @return
+     * @return the game with id: <code>gameId</code>
      */
     public Game getGame(Long gameId) {
         Game theGame = gameRepo.getOne(gameId);
@@ -63,6 +62,26 @@ public class GameService {
             LOGGER.debug("\nreturning existing game:\n" + theGame);
         }
         return theGame;
+    }
+
+    /**
+     * @param gameId
+     */
+    public void pauseGame(Long gameId) {
+        LOGGER.debug("pausing game with id: " + gameId);
+        Game game = gameRepo.getOne(gameId);
+        validateGameInProgress(game, "cannot pause a game not in progress.");
+        game.setState(PAUSED);
+    }
+
+    /**
+     * @param gameId
+     */
+    public void resumeGame(Long gameId) {
+        LOGGER.debug("resuming game with id: " + gameId);
+        Game game = gameRepo.getOne(gameId);
+        validateGamePaused(game, "cannot resume a game not paused");
+        game.setState(IN_PROGRESS);
     }
 
     /**
@@ -155,6 +174,12 @@ public class GameService {
 
     private void validateGameInProgress(Game game, String errMsg) {
         if (!game.isInProgress()) {
+            throw new IllegalStateException(errMsg);
+        }
+    }
+
+    private void validateGamePaused(Game game, String errMsg) {
+        if (!game.isPaused()) {
             throw new IllegalStateException(errMsg);
         }
     }

@@ -3,6 +3,7 @@ package ar.com.kriche.minesweeper.controller;
 import ar.com.kriche.minesweeper.domain.Game;
 import ar.com.kriche.minesweeper.domain.GameService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import static ar.com.kriche.minesweeper.domain.CellState.*;
@@ -16,6 +17,8 @@ import static ar.com.kriche.minesweeper.domain.CellState.*;
 @RequestMapping("/game")
 public class GameController {
 
+    // TODO validations and errors.
+
     @Autowired
     private GameService gameService;
 
@@ -28,6 +31,7 @@ public class GameController {
     }
 
     /**
+     * @param id the game id.
      * @return the existing game by <code>id</code>.
      */
     @GetMapping("/{id}")
@@ -36,6 +40,31 @@ public class GameController {
     }
 
     /**
+     * pauses a game in progress.
+     *
+     * @param id the game id.
+     * @return http ok.
+     */
+    @PatchMapping("/{id}/pause")
+    public ResponseEntity pauseGame(@PathVariable("id") Long id) {
+        gameService.pauseGame(id);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * resumes a paused game.
+     *
+     * @param id the game id.
+     * @return http ok
+     */
+    @PatchMapping("/{id}/resume")
+    public ResponseEntity resumeGame(@PathVariable("id") Long id) {
+        gameService.resumeGame(id);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * @param gameId the game id.
      * @param row    from the cell to make the move.
      * @param column from the cell to make the move
      * @param move   type of move to make.
@@ -46,8 +75,6 @@ public class GameController {
                          @PathVariable("row") int row,
                          @PathVariable("column") int column,
                          @RequestBody MoveDTO move) {
-
-        // TODO validations and errors.
 
         switch (move.getType()) {
             case REVEAL:

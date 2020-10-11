@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static ar.com.kriche.minesweeper.domain.GameState.IN_PROGRESS;
+import static ar.com.kriche.minesweeper.domain.GameState.PAUSED;
 
 /**
  * Represents a minesweeper board.
@@ -119,6 +120,10 @@ public class Game {
         return getState() == IN_PROGRESS;
     }
 
+    public boolean isPaused() {
+        return getState() == PAUSED;
+    }
+
     public Stream<CellCoordinate> getNeighbours(int cellRow, int cellColumn) {
 
         Stream.Builder<CellCoordinate> neighbours = Stream.builder();
@@ -140,7 +145,6 @@ public class Game {
 
         return neighbours.build();
     }
-
 
     @Override
     public String toString() {
