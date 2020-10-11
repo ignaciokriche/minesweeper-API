@@ -1,7 +1,8 @@
-package ar.com.kriche.minesweeper.service;
+package ar.com.kriche.minesweeper.service.game;
 
 import ar.com.kriche.minesweeper.domain.*;
 import ar.com.kriche.minesweeper.repository.GameRepository;
+import ar.com.kriche.minesweeper.service.RandomService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +28,11 @@ public class GameService {
 
     private static final Log LOGGER = LogFactory.getLog(GameService.class);
 
-    @Value("${service.gameService.defaultRowSize}")
+    @Value("${service.game.gameService.defaultRowSize}")
     private int defaultRowSize;
-    @Value("${service.gameService.defaultColumnSize}")
+    @Value("${service.game.gameService.defaultColumnSize}")
     private int defaultColumnSize;
-    @Value("${service.gameService.defaultMines}")
+    @Value("${service.game.gameService.defaultMines}")
     private int defaultMines;
 
     private RandomService randomService;

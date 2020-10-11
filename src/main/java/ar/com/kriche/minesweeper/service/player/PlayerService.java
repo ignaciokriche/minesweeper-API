@@ -1,4 +1,4 @@
-package ar.com.kriche.minesweeper.service;
+package ar.com.kriche.minesweeper.service.player;
 
 import ar.com.kriche.minesweeper.domain.Player;
 import ar.com.kriche.minesweeper.repository.PlayerRepository;
@@ -15,7 +15,7 @@ public class PlayerService {
 
     public Player createPlayer(String userName) {
         if (playerRepo.existsByUserName(userName)) {
-            throw new IllegalArgumentException("user name unavailable.");
+            throw new InvalidUserNameException("user name unavailable.");
         }
         Player player = new Player(userName);
         return playerRepo.save(player);
@@ -23,6 +23,9 @@ public class PlayerService {
 
     public Player getPlayerByUserName(String userName) {
         Player player = playerRepo.getPlayerByUserName(userName);
+        if (player == null) {
+            throw new PlayerNotFoundException("player not found.");
+        }
         return player;
     }
 
