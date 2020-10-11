@@ -131,6 +131,9 @@ public class GameService {
                 LOGGER.info("user won!");
             }
         }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame:\n" + game);
+        }
         return game;
     }
 
@@ -150,6 +153,9 @@ public class GameService {
             throw new IllegalGameActionException("cell already marked as: " + mark);
         }
         markCellAndUpdateGameCounters(mark, cell, game);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame:\n" + game);
+        }
         return game;
     }
 
@@ -200,7 +206,7 @@ public class GameService {
     private Game validateAndGetGame(Long gameId) {
         Optional<Game> game = gameRepo.findById(gameId);
         if (!game.isPresent()) {
-            new GameNotFoundException("game not found.");
+            throw new GameNotFoundException("game not found.");
         }
         return game.get();
     }
