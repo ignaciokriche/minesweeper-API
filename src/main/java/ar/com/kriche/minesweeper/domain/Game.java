@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static ar.com.kriche.minesweeper.domain.GameState.IN_PROGRESS;
 
 /**
  * Represents a minesweeper board.
@@ -25,7 +26,8 @@ public class Game {
     private int availableFlags;
     private int revealedCells;
     private GameState state;
-
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private SimpleTimeTracker timeTracker;
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoardRow> board;
 
@@ -42,7 +44,10 @@ public class Game {
         this.availableFlags = mines;
         this.revealedCells = 0;
         this.board = new ArrayList<>(rows);
-        this.state = GameState.IN_PROGRESS;
+        this.state = IN_PROGRESS;
+        this.timeTracker = new SimpleTimeTracker();
+        // game on, start tracking time!
+        timeTracker.start();
     }
 
     public Long getId() {
@@ -99,6 +104,11 @@ public class Game {
 
     public void setState(GameState state) {
         this.state = state;
+        if (state == IN_PROGRESS) {
+            timeTracker.start();
+        } else {
+            timeTracker.stop();
+        }
     }
 
     public GameState getState() {
@@ -106,7 +116,7 @@ public class Game {
     }
 
     public boolean isInProgress() {
-        return getState() == GameState.IN_PROGRESS;
+        return getState() == IN_PROGRESS;
     }
 
     public Stream<CellCoordinate> getNeighbours(int cellRow, int cellColumn) {
@@ -115,9 +125,9 @@ public class Game {
 
         // for border cases:
         int lowerRow = Math.max(0, cellRow - 1);
-        int upperRow = Math.min(rowSize - 1, cellRow + 1);
+        int upperRow = Math.min(getRowSize() - 1, cellRow + 1);
         int lowerColumn = Math.max(0, cellColumn - 1);
-        int upperColumn = Math.min(columnSize - 1, cellColumn + 1);
+        int upperColumn = Math.min(getColumnSize() - 1, cellColumn + 1);
 
         for (int r = lowerRow; r <= upperRow; r++) {
             for (int c = lowerColumn; c <= upperColumn; c++) {
@@ -138,7 +148,7 @@ public class Game {
         stringBuilder.append("id: ");
         stringBuilder.append(getId());
         stringBuilder.append('\n');
-        board.forEach(r -> {
+        getBoard().forEach(r -> {
             r.getCells().forEach(cell -> stringBuilder.append(cell));
             stringBuilder.append('\n');
         });
