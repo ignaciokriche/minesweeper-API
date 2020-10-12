@@ -1,11 +1,9 @@
-package ar.com.kriche.minesweeper.domain.service.game;
+package ar.com.kriche.minesweeper.service.game;
 
 import ar.com.kriche.minesweeper.domain.Cell;
 import ar.com.kriche.minesweeper.domain.Game;
 import ar.com.kriche.minesweeper.domain.Player;
 import ar.com.kriche.minesweeper.service.RandomService;
-import ar.com.kriche.minesweeper.service.game.GameService;
-import ar.com.kriche.minesweeper.service.game.IllegalGameActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
