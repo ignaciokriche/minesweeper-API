@@ -5,6 +5,7 @@ import ar.com.kriche.minesweeper.domain.Game;
 import ar.com.kriche.minesweeper.domain.Player;
 import ar.com.kriche.minesweeper.service.RandomService;
 import ar.com.kriche.minesweeper.service.game.GameService;
+import ar.com.kriche.minesweeper.service.game.IllegalGameActionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
@@ -20,9 +21,12 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import static ar.com.kriche.minesweeper.domain.CellState.UNREVEALED_QUESTION_MARK;
+import static ar.com.kriche.minesweeper.domain.CellState.UNREVEALED_RED_FLAG_MARK;
 import static ar.com.kriche.minesweeper.domain.GameState.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
@@ -427,6 +431,94 @@ public class GameServiceTest {
 
         assertEquals("expecting game over", IN_PROGRESS, game.getState());
 
+        Mockito.verify(randomService).shuffledBooleans(mines, cellCount);
+    }
+
+    @Test
+    public void givenCellWhenRedFlaggedThenCannotReveal() {
+
+        // setup:
+        Boolean[][] mineLocations = {
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+
+        };
+        List<Boolean> mineLocationsList = Arrays.stream(mineLocations).flatMap(row -> Arrays.stream(row)).collect(Collectors.toList());
+        int rows = mineLocations.length;
+        int cols = mineLocations[0].length;
+        int mines = (int) Arrays.stream(mineLocations).flatMap(row -> Arrays.stream(row)).filter(l -> l).count();
+        int cellCount = mineLocationsList.size();
+        int r = 2;
+        int c = 2;
+
+        Mockito.when(randomService.shuffledBooleans(mines, cellCount)).thenReturn(mineLocationsList);
+        Game game = getGame(rows, cols, mines);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame before move:\n" + game);
+        }
+
+        // exercise:
+        theTested.markCell(game.getId(), r, c, UNREVEALED_RED_FLAG_MARK);
+
+        // verify:
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame after move:\n" + game);
+        }
+        try {
+            theTested.revealCell(game.getId(), r, c);
+        } catch (IllegalGameActionException ex) {
+            // verify OK.
+            Mockito.verify(randomService).shuffledBooleans(mines, cellCount);
+            return;
+        }
+        // verify failed.
+        fail("expecting illegal game action.");
+    }
+
+    @Test
+    public void givenCellWhenMarkWithQuestionThenCanReveal() {
+
+        // setup:
+        Boolean[][] mineLocations = {
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+
+        };
+        List<Boolean> mineLocationsList = Arrays.stream(mineLocations).flatMap(row -> Arrays.stream(row)).collect(Collectors.toList());
+        int rows = mineLocations.length;
+        int cols = mineLocations[0].length;
+        int mines = (int) Arrays.stream(mineLocations).flatMap(row -> Arrays.stream(row)).filter(l -> l).count();
+        int cellCount = mineLocationsList.size();
+        int r = 3;
+        int c = 0;
+
+        Mockito.when(randomService.shuffledBooleans(mines, cellCount)).thenReturn(mineLocationsList);
+        Game game = getGame(rows, cols, mines);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame before move:\n" + game);
+        }
+
+        // exercise:
+        theTested.markCell(game.getId(), r, c, UNREVEALED_QUESTION_MARK);
+
+        // verify:
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame after move:\n" + game);
+        }
+        theTested.revealCell(game.getId(), r, c);
+        assertTrue("cell must be revealed.", game.cellAt(r, c).isRevealed());
         Mockito.verify(randomService).shuffledBooleans(mines, cellCount);
     }
 
