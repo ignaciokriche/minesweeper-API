@@ -20,7 +20,9 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import static ar.com.kriche.minesweeper.domain.GameState.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
@@ -291,6 +293,143 @@ public class GameServiceTest {
                 expectedRevealed);
     }
 
+    @Test
+    public void givenMinedCellWhenRevealThenGameOver() {
+
+        // setup:
+        Boolean[][] mineLocations = {
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, false, false, false, false, false, true, false, false},
+                {false, false, false, false, false, false, false, false, false, false},
+                {false, false, false, false, false, false, false, false, false, false},
+        };
+        List<Boolean> mineLocationsList = Arrays.stream(mineLocations).flatMap(row -> Arrays.stream(row)).collect(Collectors.toList());
+        int rows = mineLocations.length;
+        int cols = mineLocations[0].length;
+        int mines = (int) Arrays.stream(mineLocations).flatMap(row -> Arrays.stream(row)).filter(l -> l).count();
+        int cellCount = mineLocationsList.size();
+
+        Mockito.when(randomService.shuffledBooleans(mines, cellCount)).thenReturn(mineLocationsList);
+        Game game = getGame(rows, cols, mines);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame before move:\n" + game);
+        }
+
+        // exercise:
+        theTested.revealCell(game.getId(), 3, 7);
+
+        // verify:
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame after move:\n" + game);
+        }
+        assertEquals("expecting game over", USER_LOST, game.getState());
+        Mockito.verify(randomService).shuffledBooleans(game.getMines(), cellCount);
+
+    }
+
+    @Test
+    public void givenCellsNotMinedWhenRevealThemAllThenUserWon() {
+
+        // setup:
+        Boolean[][] mineLocations = {
+                {true, false, false, true, false, false, false, false, false, false},
+                {false, false, false, false, false, false, false, true, false, false},
+                {false, false, true, false, false, true, false, false, false, false},
+                {false, false, false, false, false, false, false, true, false, false},
+                {false, true, false, false, false, false, false, true, false, false},
+                {false, false, false, true, false, false, false, false, false, false},
+        };
+        List<Boolean> mineLocationsList = Arrays.stream(mineLocations).flatMap(row -> Arrays.stream(row)).collect(Collectors.toList());
+        int rows = mineLocations.length;
+        int cols = mineLocations[0].length;
+        int mines = (int) Arrays.stream(mineLocations).flatMap(row -> Arrays.stream(row)).filter(l -> l).count();
+        int cellCount = mineLocationsList.size();
+
+        Mockito.when(randomService.shuffledBooleans(mines, cellCount)).thenReturn(mineLocationsList);
+        Game game = getGame(rows, cols, mines);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame before move:\n" + game);
+        }
+
+        // exercise:
+        boolean atLeastOneRevealed = false;
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                if (!mineLocations[r][c] && !game.cellAt(r, c).isRevealed()) {
+                    atLeastOneRevealed = true;
+                    theTested.revealCell(game.getId(), r, c);
+                }
+            }
+        }
+
+        // verify:
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame after move:\n" + game);
+        }
+        // defensive programming, test the test :O
+        assertTrue("test did not meet exercise criteria.", atLeastOneRevealed);
+        assertEquals("expecting game over", USER_WON, game.getState());
+        Mockito.verify(randomService).shuffledBooleans(mines, cellCount);
+
+    }
+
+    @Test
+    public void givenCellsNotMinedWhileAtLeastOneUnrevealedThenUserHasNotWon() {
+
+        // setup:
+        Boolean[][] mineLocations = {
+                {false, true, false, true, false, true, false, true, false, true, false, true, false},
+                {true, false, true, false, true, false, true, false, true, false, true, false, true},
+                {false, true, false, true, false, true, false, true, false, true, false, true, false},
+                {true, false, true, false, true, false, true, false, true, false, true, false, true},
+                {false, true, false, true, false, true, false, true, false, true, false, true, false},
+                {true, false, true, false, true, false, true, false, true, false, true, false, true},
+                {false, true, false, true, false, true, false, true, false, true, false, true, false},
+
+        };
+        List<Boolean> mineLocationsList = Arrays.stream(mineLocations).flatMap(row -> Arrays.stream(row)).collect(Collectors.toList());
+        int rows = mineLocations.length;
+        int cols = mineLocations[0].length;
+        int mines = (int) Arrays.stream(mineLocations).flatMap(row -> Arrays.stream(row)).filter(l -> l).count();
+        int cellCount = mineLocationsList.size();
+
+        Mockito.when(randomService.shuffledBooleans(mines, cellCount)).thenReturn(mineLocationsList);
+        Game game = getGame(rows, cols, mines);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame before move:\n" + game);
+        }
+
+        // exercise:
+        boolean oneSkipped = false;
+        boolean atLeastOneRevealed = false;
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                if (!mineLocations[r][c] && !game.cellAt(r, c).isRevealed()) {
+                    if (!oneSkipped) {
+                        oneSkipped = true;
+                        continue;
+                    }
+                    theTested.revealCell(game.getId(), r, c);
+                    atLeastOneRevealed = true;
+                }
+            }
+        }
+
+        // verify:
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame after move:\n" + game);
+        }
+        // defensive programming, test the test :O
+        assertTrue("test did not meet exercise criteria.", oneSkipped);
+        assertTrue("test did not meet exercise criteria.", atLeastOneRevealed);
+
+        assertEquals("expecting game over", IN_PROGRESS, game.getState());
+
+        Mockito.verify(randomService).shuffledBooleans(mines, cellCount);
+    }
+
     /**
      * setups a game with <code>mineLocations</code>, makes the move calling <code>moveMaker</code> and checks the
      * result against <code>expectedResults</code>.
@@ -324,8 +463,13 @@ public class GameServiceTest {
     }
 
     private Game getGame() {
-        return theTested.newGame(new Player("kriche"), 10, 10, 10);
+        return getGame(10, 10, 10);
     }
+
+    private Game getGame(int rows, int columns, int mines) {
+        return theTested.newGame(new Player("Kriche"), rows, columns, mines);
+    }
+
 
     /**
      * asserts that <code>expectedResults</code> dimensions are equal to <code>game</code> dimensions and that each
