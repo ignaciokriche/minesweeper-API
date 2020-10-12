@@ -520,6 +520,52 @@ public class GameServiceTest {
         Mockito.verify(randomService).shuffledBooleans(mines, cellCount);
     }
 
+    @Test
+    public void whenRedFlaggingCellsThenAvailableFlagsMustBeUpdated() {
+
+        // setup:
+        Boolean[][] mineLocations = {
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+
+        };
+        List<Boolean> mineLocationsList = Arrays.stream(mineLocations).flatMap(row -> Arrays.stream(row)).collect(Collectors.toList());
+        int rows = mineLocations.length;
+        int cols = mineLocations[0].length;
+        int mines = (int) Arrays.stream(mineLocations).flatMap(row -> Arrays.stream(row)).filter(l -> l).count();
+        int cellCount = mineLocationsList.size();
+
+        Mockito.when(randomService.shuffledBooleans(mines, cellCount)).thenReturn(mineLocationsList);
+        Game game = getGame(rows, cols, mines);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame before move:\n" + game);
+        }
+
+        // exercise and verify:
+        assertEquals("wrong count of red flags", mines, game.getAvailableFlags());
+        int usedFlags = 0;
+        for (int r = 0; r < rows && usedFlags < mines; r++) {
+            for (int c = 0; c < cols && usedFlags < mines; c++) {
+                theTested.markCell(game.getId(), r, c, UNREVEALED_RED_FLAG_MARK);
+                usedFlags++;
+                assertEquals("wrong count of red flags", mines - usedFlags, game.getAvailableFlags());
+            }
+        }
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame after move:\n" + game);
+        }
+
+        Mockito.verify(randomService).shuffledBooleans(mines, cellCount);
+    }
+
+
     /**
      * setups a game with <code>mineLocations</code>, makes the move calling <code>moveMaker</code> and checks the
      * result against <code>expectedResults</code>.
