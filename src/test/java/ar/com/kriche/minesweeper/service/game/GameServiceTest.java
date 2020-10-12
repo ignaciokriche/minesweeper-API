@@ -19,8 +19,7 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-import static ar.com.kriche.minesweeper.domain.CellState.UNREVEALED_QUESTION_MARK;
-import static ar.com.kriche.minesweeper.domain.CellState.UNREVEALED_RED_FLAG_MARK;
+import static ar.com.kriche.minesweeper.domain.CellState.*;
 import static ar.com.kriche.minesweeper.domain.GameState.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -148,10 +147,11 @@ public class GameServiceTest {
                 {true, true, true, true, true, true, true, true, true, true},
         };
 
-        testMove(mineLocations,
+        Game theGame = testMove(mineLocations,
                 (game) -> theTested.revealCell(game.getId(), 2, 2),
                 cell -> cell.isRevealed(),
                 expectedRevealed);
+        assertEquals("wrong count of revealed cells.", mineLocations.size(), theGame.getRevealedCells());
     }
 
     @Test
@@ -183,10 +183,11 @@ public class GameServiceTest {
                 {false, false, false, false, false, false, false, false, false, false},
         };
 
-        testMove(mineLocations,
+        Game theGame = testMove(mineLocations,
                 (game) -> theTested.revealCell(game.getId(), 3, 4),
                 cell -> cell.isRevealed(),
                 expectedRevealed);
+        assertEquals("wrong count of revealed cells.", 1, theGame.getRevealedCells());
     }
 
     @Test
@@ -219,10 +220,12 @@ public class GameServiceTest {
 
         };
 
-        testMove(mineLocations,
+        Game theGame = testMove(mineLocations,
                 (game) -> theTested.revealCell(game.getId(), 2, 2),
                 cell -> cell.isRevealed(),
                 expectedRevealed);
+        assertEquals("wrong count of revealed cells.", 1, theGame.getRevealedCells());
+
     }
 
     @Test
@@ -254,10 +257,12 @@ public class GameServiceTest {
                 {false, false, false, false, false, false, false, false, false, false}
         };
 
-        testMove(mineLocations,
+        Game theGame = testMove(mineLocations,
                 (game) -> theTested.revealCell(game.getId(), 3, 3),
                 cell -> cell.isRevealed(),
                 expectedRevealed);
+        assertEquals("wrong count of revealed cells.", 36, theGame.getRevealedCells());
+
     }
 
     @Test
@@ -289,10 +294,11 @@ public class GameServiceTest {
                 {true, true, true, true, true, true, true, true, true, true}
         };
 
-        testMove(mineLocations,
+        Game theGame = testMove(mineLocations,
                 (game) -> theTested.revealCell(game.getId(), 0, 0),
                 cell -> cell.isRevealed(),
                 expectedRevealed);
+        assertEquals("wrong count of revealed cells.", 64, theGame.getRevealedCells());
     }
 
     @Test
@@ -458,7 +464,7 @@ public class GameServiceTest {
         Mockito.when(randomService.shuffledBooleans(mines, cellCount)).thenReturn(mineLocationsList);
         Game game = getGame(rows, cols, mines);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("\ngame before move:\n" + game);
+            LOGGER.debug("\ngame before:\n" + game);
         }
 
         // exercise:
@@ -466,7 +472,7 @@ public class GameServiceTest {
 
         // verify:
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("\ngame after move:\n" + game);
+            LOGGER.debug("\ngame after:\n" + game);
         }
         try {
             theTested.revealCell(game.getId(), r, c);
@@ -505,7 +511,7 @@ public class GameServiceTest {
         Mockito.when(randomService.shuffledBooleans(mines, cellCount)).thenReturn(mineLocationsList);
         Game game = getGame(rows, cols, mines);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("\ngame before move:\n" + game);
+            LOGGER.debug("\ngame before:\n" + game);
         }
 
         // exercise:
@@ -513,7 +519,7 @@ public class GameServiceTest {
 
         // verify:
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("\ngame after move:\n" + game);
+            LOGGER.debug("\ngame after:\n" + game);
         }
         theTested.revealCell(game.getId(), r, c);
         assertTrue("cell must be revealed.", game.cellAt(r, c).isRevealed());
@@ -521,7 +527,7 @@ public class GameServiceTest {
     }
 
     @Test
-    public void whenRedFlaggingCellsThenAvailableFlagsMustBeUpdated() {
+    public void whenRedFlaggingCellsThenAvailableFlagsMustDecrease() {
 
         // setup:
         Boolean[][] mineLocations = {
@@ -544,7 +550,7 @@ public class GameServiceTest {
         Mockito.when(randomService.shuffledBooleans(mines, cellCount)).thenReturn(mineLocationsList);
         Game game = getGame(rows, cols, mines);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("\ngame before move:\n" + game);
+            LOGGER.debug("\ngame before:\n" + game);
         }
 
         // exercise and verify:
@@ -559,24 +565,79 @@ public class GameServiceTest {
         }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("\ngame after move:\n" + game);
+            LOGGER.debug("\ngame after:\n" + game);
         }
 
         Mockito.verify(randomService).shuffledBooleans(mines, cellCount);
     }
 
+    @Test
+    public void whenRemovingRedFlagThenAvailableFlagsMustIncrease() {
+
+        // setup:
+        Boolean[][] mineLocations = {
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+                {false, true, false, true, false},
+
+        };
+        List<Boolean> mineLocationsList = Arrays.stream(mineLocations).flatMap(row -> Arrays.stream(row)).collect(Collectors.toList());
+        int rows = mineLocations.length;
+        int cols = mineLocations[0].length;
+        int mines = (int) Arrays.stream(mineLocations).flatMap(row -> Arrays.stream(row)).filter(l -> l).count();
+        int cellCount = mineLocationsList.size();
+
+        Mockito.when(randomService.shuffledBooleans(mines, cellCount)).thenReturn(mineLocationsList);
+        Game game = getGame(rows, cols, mines);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame before:\n" + game);
+        }
+
+        // red flag the cells:
+        int usedFlags = 0;
+        for (int r = 0; r < rows && usedFlags < mines; r++) {
+            for (int c = 0; c < cols && usedFlags < mines; c++) {
+                theTested.markCell(game.getId(), r, c, UNREVEALED_RED_FLAG_MARK);
+                usedFlags++;
+            }
+        }
+
+        // exercise and verify:
+        assertEquals("wrong count of red flags", 0, game.getAvailableFlags());
+        assertEquals("all flags should have been used.", usedFlags, mines);
+        for (int r = 0; r < rows && usedFlags > 0; r++) {
+            for (int c = 0; c < cols && usedFlags > 0; c++) {
+                theTested.markCell(game.getId(), r, c, usedFlags % 2 == 0 ? UNREVEALED_NO_MARK : UNREVEALED_QUESTION_MARK);
+                usedFlags--;
+                assertEquals("wrong count of red flags", mines - usedFlags, game.getAvailableFlags());
+            }
+        }
+        assertEquals("all flags should have been used.", usedFlags, 0);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("\ngame after:\n" + game);
+        }
+
+        Mockito.verify(randomService).shuffledBooleans(mines, cellCount);
+    }
 
     /**
      * setups a game with <code>mineLocations</code>, makes the move calling <code>moveMaker</code> and checks the
      * result against <code>expectedResults</code>.
      *
      * @param mineLocations
-     * @param expectedResults
      * @param moveMaker
      * @param cellMapper
+     * @param expectedResults
      * @param <R>
+     * @return the used game.
      */
-    private <R> void testMove(List mineLocations,
+    private <R> Game testMove(List mineLocations,
                               UnaryOperator<Game> moveMaker,
                               Function<Cell, R> cellMapper,
                               R[][] expectedResults) {
@@ -596,6 +657,8 @@ public class GameServiceTest {
         }
         verifyCells(expectedResults, game, cellMapper);
         Mockito.verify(randomService).shuffledBooleans(game.getMines(), mineLocations.size());
+
+        return game;
     }
 
     private Game getGame() {
