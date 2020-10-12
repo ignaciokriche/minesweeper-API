@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/player")
 public class PlayerController {
 
-    // TODO validations and errors.
-
     @Autowired
     private PlayerService playerService;
 
