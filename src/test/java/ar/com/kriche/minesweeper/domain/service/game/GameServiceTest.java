@@ -1,4 +1,4 @@
-package ar.com.kriche.minesweeper.domain.service;
+package ar.com.kriche.minesweeper.domain.service.game;
 
 import ar.com.kriche.minesweeper.domain.Cell;
 import ar.com.kriche.minesweeper.domain.Game;
