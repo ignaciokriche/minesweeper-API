@@ -37,4 +37,9 @@ public class Player {
         getGames().add(game);
     }
 
+    @Override
+    public String toString() {
+        return getUserName();
+    }
+
 }

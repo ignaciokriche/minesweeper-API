@@ -64,6 +64,10 @@ public class GameService {
      * @return a newly created game with the given parameters.
      */
     public Game newGame(Player owner, int rows, int columns, int mines) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("creating new game for owner: \"" +
+                    owner + "\" with dimensions [" + rows + ", " + columns + ", " + mines + "].");
+        }
         Game theGame = initializeGame(owner, rows, columns, mines);
         owner.addGame(theGame);
         theGame = gameRepo.save(theGame);
@@ -78,6 +82,7 @@ public class GameService {
      * @return the game with id: <code>gameId</code>
      */
     public Game getGame(Long gameId) {
+        LOGGER.info("getting game by id: " + gameId);
         Game theGame = validateAndGetGame(gameId);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("\nreturning existing game:\n" + theGame);
@@ -89,7 +94,7 @@ public class GameService {
      * @param gameId
      */
     public void pauseGame(Long gameId) {
-        LOGGER.debug("pausing game with id: " + gameId);
+        LOGGER.info("pausing game with id: " + gameId);
         Game game = validateAndGetGame(gameId);
         validateGameInProgress(game, "cannot pause a game not in progress.");
         game.setState(PAUSED);
@@ -99,7 +104,7 @@ public class GameService {
      * @param gameId
      */
     public void resumeGame(Long gameId) {
-        LOGGER.debug("resuming game with id: " + gameId);
+        LOGGER.info("resuming game with id: " + gameId);
         Game game = validateAndGetGame(gameId);
         validateGamePaused(game, "cannot resume a game not paused");
         game.setState(IN_PROGRESS);
@@ -112,7 +117,7 @@ public class GameService {
      * @return
      */
     public Game revealCell(Long gameId, int row, int column) {
-        LOGGER.debug("reveal cell [" + row + "," + column + "].");
+        LOGGER.info("reveal cell [" + row + "," + column + "].");
         Game game = validateAndGetGame(gameId);
         validateGameInProgress(game, "cannot reveal a cell of a game not in progress.");
         Cell cell = game.cellAt(row, column);
@@ -144,7 +149,7 @@ public class GameService {
      * @return
      */
     public Game markCell(Long gameId, int row, int column, CellState mark) {
-        LOGGER.debug("mark cell [" + row + "," + column + "] with: " + mark);
+        LOGGER.info("mark cell [" + row + "," + column + "] with: " + mark);
         Game game = validateAndGetGame(gameId);
         validateGameInProgress(game, "cannot mark cell of a game not in progress.");
         Cell cell = game.cellAt(row, column);
