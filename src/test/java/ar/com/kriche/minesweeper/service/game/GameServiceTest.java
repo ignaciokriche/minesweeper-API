@@ -21,9 +21,7 @@ import java.util.stream.Collectors;
 
 import static ar.com.kriche.minesweeper.domain.CellState.*;
 import static ar.com.kriche.minesweeper.domain.GameState.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
@@ -151,7 +149,7 @@ public class GameServiceTest {
                 (game) -> theTested.revealCell(game.getId(), 2, 2),
                 cell -> cell.isRevealed(),
                 expectedRevealed);
-        assertEquals("wrong count of revealed cells.", mineLocations.size(), theGame.getRevealedCells());
+        assertEquals(mineLocations.size(), theGame.getRevealedCells(), "wrong count of revealed cells.");
     }
 
     @Test
@@ -187,7 +185,7 @@ public class GameServiceTest {
                 (game) -> theTested.revealCell(game.getId(), 3, 4),
                 cell -> cell.isRevealed(),
                 expectedRevealed);
-        assertEquals("wrong count of revealed cells.", 1, theGame.getRevealedCells());
+        assertEquals(1, theGame.getRevealedCells(), "wrong count of revealed cells.");
     }
 
     @Test
@@ -224,7 +222,7 @@ public class GameServiceTest {
                 (game) -> theTested.revealCell(game.getId(), 2, 2),
                 cell -> cell.isRevealed(),
                 expectedRevealed);
-        assertEquals("wrong count of revealed cells.", 1, theGame.getRevealedCells());
+        assertEquals(1, theGame.getRevealedCells(), "wrong count of revealed cells.");
 
     }
 
@@ -261,7 +259,7 @@ public class GameServiceTest {
                 (game) -> theTested.revealCell(game.getId(), 3, 3),
                 cell -> cell.isRevealed(),
                 expectedRevealed);
-        assertEquals("wrong count of revealed cells.", 36, theGame.getRevealedCells());
+        assertEquals(36, theGame.getRevealedCells(), "wrong count of revealed cells.");
 
     }
 
@@ -298,7 +296,7 @@ public class GameServiceTest {
                 (game) -> theTested.revealCell(game.getId(), 0, 0),
                 cell -> cell.isRevealed(),
                 expectedRevealed);
-        assertEquals("wrong count of revealed cells.", 64, theGame.getRevealedCells());
+        assertEquals(64, theGame.getRevealedCells(), "wrong count of revealed cells.");
     }
 
     @Test
@@ -332,7 +330,7 @@ public class GameServiceTest {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("\ngame after move:\n" + game);
         }
-        assertEquals("expecting game over", USER_LOST, game.getState());
+        assertEquals(USER_LOST, game.getState(), "expecting game over");
         Mockito.verify(randomService).shuffledBooleans(game.getMines(), cellCount);
 
     }
@@ -377,8 +375,8 @@ public class GameServiceTest {
             LOGGER.debug("\ngame after move:\n" + game);
         }
         // defensive programming, test the test :O
-        assertTrue("test did not meet exercise criteria.", atLeastOneRevealed);
-        assertEquals("expecting game over", USER_WON, game.getState());
+        assertTrue(atLeastOneRevealed, "test did not meet exercise criteria.");
+        assertEquals(USER_WON, game.getState(), "expecting game over");
         Mockito.verify(randomService).shuffledBooleans(mines, cellCount);
 
     }
@@ -430,10 +428,10 @@ public class GameServiceTest {
             LOGGER.debug("\ngame after move:\n" + game);
         }
         // defensive programming, test the test :O
-        assertTrue("test did not meet exercise criteria.", oneSkipped);
-        assertTrue("test did not meet exercise criteria.", atLeastOneRevealed);
+        assertTrue(oneSkipped, "test did not meet exercise criteria.");
+        assertTrue(atLeastOneRevealed, "test did not meet exercise criteria.");
 
-        assertEquals("expecting game over", IN_PROGRESS, game.getState());
+        assertEquals(IN_PROGRESS, game.getState(), "expecting game over");
 
         Mockito.verify(randomService).shuffledBooleans(mines, cellCount);
     }
@@ -522,7 +520,7 @@ public class GameServiceTest {
             LOGGER.debug("\ngame after:\n" + game);
         }
         theTested.revealCell(game.getId(), r, c);
-        assertTrue("cell must be revealed.", game.cellAt(r, c).isRevealed());
+        assertTrue(game.cellAt(r, c).isRevealed(), "cell must be revealed.");
         Mockito.verify(randomService).shuffledBooleans(mines, cellCount);
     }
 
@@ -554,13 +552,13 @@ public class GameServiceTest {
         }
 
         // exercise and verify:
-        assertEquals("wrong count of red flags", mines, game.getAvailableFlags());
+        assertEquals(mines, game.getAvailableFlags(), "wrong count of red flags.");
         int usedFlags = 0;
         for (int r = 0; r < rows && usedFlags < mines; r++) {
             for (int c = 0; c < cols && usedFlags < mines; c++) {
                 theTested.markCell(game.getId(), r, c, UNREVEALED_RED_FLAG_MARK);
                 usedFlags++;
-                assertEquals("wrong count of red flags", mines - usedFlags, game.getAvailableFlags());
+                assertEquals(mines - usedFlags, game.getAvailableFlags(), "wrong count of red flags.");
             }
         }
 
@@ -608,16 +606,16 @@ public class GameServiceTest {
         }
 
         // exercise and verify:
-        assertEquals("wrong count of red flags", 0, game.getAvailableFlags());
-        assertEquals("all flags should have been used.", usedFlags, mines);
+        assertEquals(0, game.getAvailableFlags(), "wrong count of red flags.");
+        assertEquals(usedFlags, mines, "all flags should have been used.");
         for (int r = 0; r < rows && usedFlags > 0; r++) {
             for (int c = 0; c < cols && usedFlags > 0; c++) {
                 theTested.markCell(game.getId(), r, c, usedFlags % 2 == 0 ? UNREVEALED_NO_MARK : UNREVEALED_QUESTION_MARK);
                 usedFlags--;
-                assertEquals("wrong count of red flags", mines - usedFlags, game.getAvailableFlags());
+                assertEquals(mines - usedFlags, game.getAvailableFlags(), "wrong count of red flags.");
             }
         }
-        assertEquals("all flags should have been used.", usedFlags, 0);
+        assertEquals(usedFlags, 0, "all flags should have been used.");
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("\ngame after:\n" + game);
@@ -680,12 +678,12 @@ public class GameServiceTest {
      * @param <R>
      */
     private <R> void verifyCells(R[][] expectedResults, Game game, Function<Cell, R> cellMapper) {
-        assertEquals("wrong number of rows", expectedResults.length, game.getRowSize());
-        assertEquals("wrong number of columns", expectedResults[0].length, game.getColumnSize());
+        assertEquals(expectedResults.length, game.getRowSize(), "wrong number of rows.");
+        assertEquals(expectedResults[0].length, game.getColumnSize(), "wrong number of columns.");
         for (int r = 0; r < expectedResults.length; r++) {
             for (int c = 0; c < expectedResults[r].length; c++) {
                 Cell cell = game.cellAt(r, c);
-                assertEquals("at row: " + r + ", col: " + c, expectedResults[r][c], cellMapper.apply(cell));
+                assertEquals(expectedResults[r][c], cellMapper.apply(cell), "at row: " + r + ", col: " + c);
             }
         }
     }
