@@ -1,26 +1,30 @@
 This is the Ignacio's implementation of the Minesweeper game.
 
 # Try it live at:
-    Game API:
+
+    Api:
         https://minesweeper-kriche.herokuapp.com/minesweeper/
+
+    Api Documentation:
+        https://minesweeper-kriche.herokuapp.com/minesweeper/v2/api-docs
+
     Swagger UI:
         https://minesweeper-kriche.herokuapp.com/minesweeper/swagger-ui/
 
-    Please, allow a few seconds after the first hit for Heroku to start the service.
-    Subsequent calls should be faster.
-
+    ****************************************************************************************
+    *** PLEASE, allow a few seconds after the first hit for Heroku to start the service. ***
+    *** Subsequent calls should be faster.                                               ***
+    ****************************************************************************************
 
 # decisions taken and important notes:
 
-WIP
+1. Please, find original content of this file at the bottom.
 
-2. Please, find original content of this file at the bottom.
-
-3. Programming strategy:
+2. Programming Strategy:
     I decided to start with a simple design not worrying too much in packaging structure or performance. As code grows
     and more classes are added. I organize them into packages.
 
-4. Out of scope:
+3. Out of scope:
     I was instructed by Daiana Vazquez ONLY to develop the Java backend side. Happy to discuss a client in React Native.
     Some versions of Minesweeper will set up the board by never placing a mine on the first square revealed.
     Avoidable guesses.
@@ -30,7 +34,7 @@ WIP
     Stress testing.
     However, I will be happy to discuss how to implement any of these.
 
-5. Game model:
+4. Game model:
     The cell:
     Option 1, Cell state will be 4 independents fields:
         mined: boolean.
@@ -43,8 +47,8 @@ WIP
         mark: unrevealed_flag, unrevealed_question, unrevealed_no_mark, revealed.
         adjacent mines.
 
-    After some thoughts I find option 2 closer to business rules since makes no sense to have a revealed mine flagged.
-    To prevent reaching an inconsistent state I went with option 2. On the other hand, option 1 could be more flexible
+    After some thoughts I find option 2 closer to game rules since it makes no sense to have a revealed mine flagged.
+    To prevent reaching an inconsistent state, I went with option 2. On the other hand, option 1 could be more flexible
     to new rules.
     It's also not needed to compute adjacent mines for a mined cell.
 
@@ -57,12 +61,32 @@ WIP
         I keep some calculated values such as available flags and revealed cells in the Game object to avoid walking the
         whole board each time the user makes a move.
 
-    The JSON model:
-        WIP
+5. The API:
+    for all operations that can have the game board changed, I decided to return the whole game.
+    This makes sense especially when revealing a cell which can trigger many more cells revealed.
 
+6. Validations:
+    game rules validations are performed by the GameService class and latter translated to Http
+    response codes at controller level thus keeping the Domain layer independent from the View layer.
 
-6. Known issues:
+7. Persistence:
+    JPA with Hibernate, H2 for local, PosgreSQL for Heroku. Happy to discuss other approaches.
+
+8. Design notes:
+
+    There are some "player moves" such as flagging/revealing a cell that have impact not only in the cell but
+    in the state of the game. I unified the logic to handle this under "one single entry point" to reduce the
+    possibility of introducing bugs.
+    Check: GameService.markCellAndUpdateGameCounters.
+    Another example is time tracking: when the game state changes from/to pause/resume the time has to be
+    tracked so I added that logic inside Game.setState method to make it harder to make a mistake there.
+
+    There is one class intentionally @Deprecated to highlight its implementation is not suitable for a real case:
+    RandomService
+
+9. Known issues (should I be telling you this?):
     Persistence is using the same default sequence across all tables. Ideally there should be one per table.
+
 
 Original content follows:
 
