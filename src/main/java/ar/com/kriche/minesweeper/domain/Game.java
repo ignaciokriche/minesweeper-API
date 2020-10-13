@@ -29,9 +29,9 @@ public class Game {
     @Enumerated(EnumType.STRING)
     private GameState state;
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    private SimpleTimeTracker timeTracker;
+    private SimpleTimeTracker timeTracker = new SimpleTimeTracker();
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BoardRow> board;
+    private List<BoardRow> board = new ArrayList<>();
     @ManyToOne
     private Player player;
 
@@ -48,15 +48,17 @@ public class Game {
         this.mines = mines;
         this.availableFlags = mines;
         this.revealedCells = 0;
-        this.board = new ArrayList<>(rows);
         this.state = IN_PROGRESS;
-        this.timeTracker = new SimpleTimeTracker();
         // game on, start tracking time!
         timeTracker.start();
     }
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Player getPlayer() {

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import org.springframework.boot.jackson.JsonComponent;
+import org.springframework.context.annotation.Profile;
 
 import java.io.IOException;
 import java.util.function.Function;
@@ -13,6 +14,7 @@ import java.util.function.Function;
 import static ar.com.kriche.minesweeper.domain.GameState.IN_PROGRESS;
 
 @JsonComponent
+@Profile("!test") // we want the "real domain" game for testing.
 public class GameSerializer extends JsonSerializer<Game> {
 
     @Override
