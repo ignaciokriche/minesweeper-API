@@ -16,6 +16,7 @@ public class BoardRow {
     private Long id;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id")
     private List<Cell> cells = new ArrayList<>();
 
     public List<Cell> getCells() {

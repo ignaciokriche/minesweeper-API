@@ -31,6 +31,7 @@ public class Game {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private SimpleTimeTracker timeTracker = new SimpleTimeTracker();
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id")
     private List<BoardRow> board = new ArrayList<>();
     @ManyToOne
     private Player player;

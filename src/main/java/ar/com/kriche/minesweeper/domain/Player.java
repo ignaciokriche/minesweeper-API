@@ -14,8 +14,11 @@ public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
     private String userName;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "player", orphanRemoval = true)
+    @OrderBy("id")
     private List<Game> games = new ArrayList<>();
 
     /**
