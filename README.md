@@ -11,6 +11,16 @@ This is the Ignacio's implementation of the Minesweeper game.
     Swagger UI:
         https://minesweeper-kriche.herokuapp.com/minesweeper/swagger-ui/
 
+    Usage example:
+        1. create your player:
+            POST https://minesweeper-kriche.herokuapp.com/minesweeper/player/{user name}
+        2. create your game:
+            POST https://minesweeper-kriche.herokuapp.com/minesweeper/game/{userName}​
+            or custom game:
+            POST https://minesweeper-kriche.herokuapp.com/minesweeper/game/{userName}​/{rows}​/{columns}​/{mines}
+        3. play:
+            PATCH https://minesweeper-kriche.herokuapp.com/minesweeper/game/{id}/board/{row}/{column}
+
     ****************************************************************************************
     *** PLEASE, allow a few seconds after the first hit for Heroku to start the service. ***
     *** Subsequent calls should be faster.                                               ***
@@ -20,11 +30,13 @@ This is the Ignacio's implementation of the Minesweeper game.
 
 1. Please, find original content of this file at the bottom.
 
-2. Programming Strategy:
+2. Heroku limits the DB usage (10000 records ish) for a free account, please let me know if you get SQL errors.
+
+3. Programming Strategy:
     I decided to start with a simple design not worrying too much in packaging structure or performance. As code grows
     and more classes are added. I organize them into packages.
 
-3. Out of scope:
+4. Out of scope:
     I was instructed by Daiana Vazquez ONLY to develop the Java backend side. Happy to discuss a client in React Native.
     Some versions of Minesweeper will set up the board by never placing a mine on the first square revealed.
     Avoidable guesses.
@@ -34,8 +46,10 @@ This is the Ignacio's implementation of the Minesweeper game.
     Stress testing.
     However, I will be happy to discuss how to implement any of these.
 
-4. Game model:
+5. Game model:
+
     The cell:
+
     Option 1, Cell state will be 4 independents fields:
         mined: boolean.
         revealed: boolean.
@@ -53,26 +67,30 @@ This is the Ignacio's implementation of the Minesweeper game.
     It's also not needed to compute adjacent mines for a mined cell.
 
     The Board:
+
         a possibility is to use a Cell[][] however keeping in mind persistence (since I went with a relational DB using
         JPA/Hibernate) I decided to use List<List<Cell>>.
         If an API call results in just one cell mutated then it will trigger just SQL operations related to that cell.
 
     The Game:
+
         I keep some calculated values such as available flags and revealed cells in the Game object to avoid walking the
         whole board each time the user makes a move.
 
-5. The API:
+6. The API:
+
     for all operations that can have the game board changed, I decided to return the whole game.
     This makes sense especially when revealing a cell which can trigger many more cells revealed.
 
-6. Validations:
+7. Validations:
+
     game rules validations are performed by the GameService class and latter translated to Http
     response codes at controller level thus keeping the Domain layer independent from the View layer.
 
-7. Persistence:
+8. Persistence:
     JPA with Hibernate, H2 for local, PosgreSQL for Heroku. Happy to discuss other approaches.
 
-8. Design notes:
+9. Design notes:
 
     There are some "player moves" such as flagging/revealing a cell that have impact not only in the cell but
     in the state of the game. I unified the logic to handle this under "one single entry point" to reduce the
@@ -84,7 +102,23 @@ This is the Ignacio's implementation of the Minesweeper game.
     There is one class intentionally @Deprecated to highlight its implementation is not suitable for a real case:
     RandomService
 
-9. Known issues (should I be telling you this?):
+10. Because of the Cell JSON model described in point 5 when the game finishes there is no need to reveal all the cells.
+    The client will have all the information needed in the board to display to the user the complete picture.
+    For example a mined cell will now contain all the fields:
+    {
+            "mined": true,
+            "adjacentMines": 0,
+            "state": "UNREVEALED_QUESTION_MARK"
+    }
+
+    {
+            "mined": true,
+            "adjacentMines": 0,
+            "state": "REVEALED" --> this was the cell that caused the user to loose.
+    }
+
+
+11. Known issues (should I be telling you this?):
     Persistence is using the same default sequence across all tables. Ideally there should be one per table.
 
 
