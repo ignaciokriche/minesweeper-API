@@ -2,6 +2,9 @@ package ar.com.kriche.minesweeper.domain;
 
 import javax.persistence.*;
 
+/**
+ * @Author Kriche 2020
+ */
 @Entity
 @Table(name = "simple_time_tracker")
 public class SimpleTimeTracker {

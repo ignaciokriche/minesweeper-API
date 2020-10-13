@@ -8,6 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Handles player actions.
+ *
+ * @Author Kriche 2020
+ */
+
 @Service
 @Transactional
 public class PlayerService {
@@ -17,6 +23,10 @@ public class PlayerService {
     @Autowired
     private PlayerRepository playerRepo;
 
+    /**
+     * @param userName
+     * @return
+     */
     public Player createPlayer(String userName) {
         LOGGER.info("creating player with user name: \"" + userName + "\".");
         if (playerRepo.existsByUserName(userName)) {
@@ -26,6 +36,11 @@ public class PlayerService {
         return playerRepo.save(player);
     }
 
+    /**
+     *
+     * @param userName
+     * @return
+     */
     public Player getPlayerByUserName(String userName) {
         LOGGER.info("getting player by user name: \"" + userName + "\".");
         Player player = playerRepo.getPlayerByUserName(userName);

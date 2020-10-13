@@ -13,6 +13,9 @@ import java.util.function.Function;
 
 import static ar.com.kriche.minesweeper.domain.GameState.IN_PROGRESS;
 
+/**
+ * @Author Kriche 2020
+ */
 @JsonComponent
 @Profile("!test") // we want the "real domain" game for testing.
 public class GameSerializer extends JsonSerializer<Game> {

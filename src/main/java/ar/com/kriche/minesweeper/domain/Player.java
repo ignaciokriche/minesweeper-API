@@ -4,6 +4,9 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @Author Kriche 2020
+ */
 @Entity
 @Table(name = "player")
 public class Player {
