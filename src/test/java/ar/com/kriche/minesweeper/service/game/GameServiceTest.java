@@ -25,6 +25,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
+/**
+ * Game logic tests.
+ *
+ * @Author Kriche 2020
+ */
 @SpringBootTest
 @Transactional
 public class GameServiceTest {
