@@ -82,7 +82,6 @@ public class GameControllerTest {
         assertEquals(MINES, response.getMines());
         verify(playerService).getPlayerByUserName(USER_NAME);
         verify(gameService).newGame(aPlayer, ROWS, COLUMNS, MINES);
-
     }
 
     @Test
