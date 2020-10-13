@@ -9,6 +9,8 @@ import org.springframework.boot.jackson.JsonComponent;
 import org.springframework.context.annotation.Profile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 import static ar.com.kriche.minesweeper.domain.GameState.IN_PROGRESS;
@@ -42,8 +44,17 @@ public class GameSerializer extends JsonSerializer<Game> {
             // game finished: good to show all the information.
             cellToCellDTO = cell -> new CellDTO(cell.isMined(), cell.getAdjacentMines(), cell.getState());
         }
-        jsonGenerator.writeObjectField("board",
-                game.getBoard().stream().map(r -> r.getCells().stream().map(cell -> cellToCellDTO.apply(cell))));
+
+        // note that using stream does not guarantee order
+        List<List<CellDTO>> boardDto = new ArrayList<>(game.getRowSize());
+        game.getBoard().forEach(boardRow -> {
+            List<CellDTO> rowDto = new ArrayList<>(game.getColumnSize());
+            boardRow.getCells().forEach(cell -> {
+                rowDto.add(cellToCellDTO.apply(cell));
+            });
+            boardDto.add(rowDto);
+        });
+        jsonGenerator.writeObjectField("board", boardDto);
 
         jsonGenerator.writeEndObject();
     }
