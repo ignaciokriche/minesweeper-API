@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
@@ -100,10 +101,13 @@ public class GameController {
      * @return the updated game.
      */
     @PatchMapping("/{id}/board/{row}/{column}")
-    public Game makeMove(@PathVariable("id") Long gameId,
-                         @PathVariable("row") int row,
-                         @PathVariable("column") int column,
-                         @RequestBody MoveDTO move) {
+    public Game makeMove(
+            @PathVariable("id") Long gameId,
+            @Min(0) @Max(49)
+            @PathVariable("row") int row,
+            @Min(0) @Max(49)
+            @PathVariable("column") int column,
+            @RequestBody MoveDTO move) {
 
         switch (move.getType()) {
             case REVEAL:
