@@ -119,6 +119,7 @@ public class GameService {
     public Game revealCell(Long gameId, int row, int column) {
         LOGGER.info("reveal cell [" + row + "," + column + "].");
         Game game = validateAndGetGame(gameId);
+        validateCellCoords(row, column, game);
         validateGameInProgress(game, "cannot reveal a cell of a game not in progress.");
         Cell cell = game.cellAt(row, column);
         validateCellNotRevealed(cell, "cannot reveal a cell already revealed.");
@@ -151,6 +152,7 @@ public class GameService {
     public Game markCell(Long gameId, int row, int column, CellState mark) {
         LOGGER.info("mark cell [" + row + "," + column + "] with: " + mark);
         Game game = validateAndGetGame(gameId);
+        validateCellCoords(row, column, game);
         validateGameInProgress(game, "cannot mark cell of a game not in progress.");
         Cell cell = game.cellAt(row, column);
         validateCellNotRevealed(cell, "cannot modify a revealed cell.");
@@ -214,6 +216,15 @@ public class GameService {
             throw new GameNotFoundException("game not found.");
         }
         return game.get();
+    }
+
+    private void validateCellCoords(int row, int column, Game game) {
+        if (row < 0 || row >= game.getRowSize()) {
+            throw new IllegalGameConfigurationException("invalid row parameter.");
+        }
+        if (column < 0 || column >= game.getColumnSize()) {
+            throw new IllegalGameConfigurationException("invalid column parameter.");
+        }
     }
 
     private void validateCellNotRevealed(Cell cell, String errMsg) {
