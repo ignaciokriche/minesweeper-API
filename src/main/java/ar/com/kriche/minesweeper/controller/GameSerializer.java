@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import static ar.com.kriche.minesweeper.domain.GameState.IN_PROGRESS;
 
 /**
  * @Author Kriche 2020
@@ -37,12 +36,12 @@ public class GameSerializer extends JsonSerializer<Game> {
         jsonGenerator.writeNumberField("elapsedTimeMilliseconds", game.getElapsedTimeMilliseconds());
 
         Function<Cell, CellDTO> cellToCellDTO;
-        if (game.getState() == IN_PROGRESS) {
-            // while in progress don't tell if a cell is mined and show adjacent mines only if the cell is revealed:
-            cellToCellDTO = cell -> new CellDTO(null, cell.isRevealed() ? cell.getAdjacentMines() : null, cell.getState());
-        } else {
+        if (game.isFinished()) {
             // game finished: good to show all the information.
             cellToCellDTO = cell -> new CellDTO(cell.isMined(), cell.getAdjacentMines(), cell.getState());
+        } else {
+            // while in progress don't tell if a cell is mined and show adjacent mines only if the cell is revealed:
+            cellToCellDTO = cell -> new CellDTO(null, cell.isRevealed() ? cell.getAdjacentMines() : null, cell.getState());
         }
 
         // note that using stream does not guarantee order

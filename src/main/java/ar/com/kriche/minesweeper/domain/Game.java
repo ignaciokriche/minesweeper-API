@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static ar.com.kriche.minesweeper.domain.GameState.IN_PROGRESS;
-import static ar.com.kriche.minesweeper.domain.GameState.PAUSED;
+import static ar.com.kriche.minesweeper.domain.GameState.*;
 
 /**
  * Represents a minesweeper board.
@@ -121,6 +120,10 @@ public class Game {
         } else {
             timeTracker.stop();
         }
+    }
+
+    public boolean isFinished() {
+        return getState() == USER_WON || getState() == USER_LOST;
     }
 
     public GameState getState() {
