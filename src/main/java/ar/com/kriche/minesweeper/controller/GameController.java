@@ -24,6 +24,12 @@ import static ar.com.kriche.minesweeper.domain.CellState.*;
 @Transactional // tx here since this controller works with 2 services and we want to keep all calls within the same tx.
 public class GameController {
 
+    private static final int MIN_ROW_SIZE = 1;
+    private static final int MAX_ROW_SIZE = 50;
+    private static final int MIN_COLUMN_SIZE = 1;
+    private static final int MAX_COLUMN_SIZE = 50;
+    private static final int MIN_MINES = 0;
+
     @Autowired
     private GameService gameService;
 
@@ -50,11 +56,11 @@ public class GameController {
     @PostMapping("/{userName}/{rows}/{columns}/{mines}")
     public Game createCustomGame(
             @PathVariable("userName") String userName,
-            @Min(1) @Max(50)
+            @Min(MIN_ROW_SIZE) @Max(MAX_ROW_SIZE)
             @PathVariable("rows") int rows,
-            @Min(1) @Max(50)
+            @Min(MIN_COLUMN_SIZE) @Max(MAX_COLUMN_SIZE)
             @PathVariable("columns") int columns,
-            @Min(0)
+            @Min(MIN_MINES)
             @PathVariable("mines") int mines) {
         Player player = playerService.getPlayerByUserName(userName);
         return gameService.newGame(player, rows, columns, mines);
@@ -103,9 +109,9 @@ public class GameController {
     @PatchMapping("/{id}/board/{row}/{column}")
     public Game makeMove(
             @PathVariable("id") Long gameId,
-            @Min(0) @Max(49)
+            @Min(0) @Max(MAX_ROW_SIZE - 1)
             @PathVariable("row") int row,
-            @Min(0) @Max(49)
+            @Min(0) @Max(MAX_COLUMN_SIZE - 1)
             @PathVariable("column") int column,
             @RequestBody MoveDTO move) {
 
