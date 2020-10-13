@@ -130,7 +130,7 @@ public class GameService {
             game.setState(USER_LOST);
             LOGGER.info("game over!");
         } else {
-            revealAndPropagate(row, column, game);
+            new Revealer(game).revealAndPropagate(row, column);
             if (game.getRevealedCells() == game.getRowSize() * game.getColumnSize() - game.getMines()) {
                 game.setState(USER_WON);
                 LOGGER.info("user won!");
@@ -235,23 +235,6 @@ public class GameService {
     }
 
     /**
-     * if the cell at <code>row</code>, <code>column</code> is not revealed then reveal it and remove its mark.
-     * Repeats for cell's neighbours if cell has no adjacent mines.
-     *
-     * @param row
-     * @param column
-     */
-    private void revealAndPropagate(int row, int column, Game game) {
-        Cell cell = game.cellAt(row, column);
-        if (!cell.isRevealed()) {
-            markCellAndUpdateGameCounters(REVEALED, cell, game);
-            if (cell.getAdjacentMines() == 0) {
-                game.getNeighbours(row, column).forEach(n -> revealAndPropagate(n.getRow(), n.getColumn(), game));
-            }
-        }
-    }
-
-    /**
      * updates cell state and available flags and revealed cell counters accordingly.
      * use only this method to mutate a cell mark!
      *
@@ -292,6 +275,41 @@ public class GameService {
         }
 
         cell.setState(state);
+
+    }
+
+    /**
+     * @Author Kriche 2020
+     * <p>
+     * Helper class to optimize recursive calls.
+     */
+    private final class Revealer {
+
+        private Game game;
+
+        Revealer(Game game) {
+            this.game = game;
+        }
+
+        /**
+         * if the cell at <code>row</code>, <code>column</code> is not revealed then reveal it and remove its mark.
+         * Repeats for cell's neighbours if cell has no adjacent mines.
+         *
+         * @param row
+         * @param column
+         */
+        // since "game" reference doesn't change across the recursive calls then defining "revealAndPropagate" here
+        // makes it possible to avoid passing the same game reference in each recursive call thus optimizing memory for
+        // large cases.
+        void revealAndPropagate(int row, int column) {
+            Cell cell = game.cellAt(row, column);
+            if (!cell.isRevealed()) {
+                markCellAndUpdateGameCounters(REVEALED, cell, game);
+                if (cell.getAdjacentMines() == 0) {
+                    game.getNeighbours(row, column).forEach(n -> revealAndPropagate(n.getRow(), n.getColumn()));
+                }
+            }
+        }
 
     }
 
